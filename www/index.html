@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#E8553A">
@@ -2349,7 +2346,7 @@ function hideSplashAfterDelay() {
 }
 
 function registerServiceWorker() {
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=3').catch(() => {});
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 async function setupBackButton() {
@@ -2411,11 +2408,38 @@ function filterCategory(cat) {
   if (state.selectedIngredients.length > 0) {
     searchByIngredients();
   } else {
-    if (cat === 'all') loadInitialRecipes();
-    else {
+    if (cat === 'all') {
+      loadInitialRecipes();
+    } else {
       const cats = CATEGORY_MAP[cat] || [];
-      if (cats.length > 0) loadByCategory(cats[0]);
-      else loadInitialRecipes();
+      if (cats.length > 0) {
+        // Load ALL subcategories in the group (e.g. food → Beef+Chicken+Lamb+...)
+        showLoading();
+        state.meals = FALLBACK_RECIPES.filter(m => cats.includes(m.strCategory));
+        filterAndRenderMeals();
+        // Background: try API for each subcategory
+        cats.forEach(c => {
+          apiFetch(`/filter.php?c=${encodeURIComponent(c)}`).then(data => {
+            if (data.meals && data.meals.length > 0) {
+              const localIds = new Set(state.meals.map(m => m.idMeal));
+              const newMeals = data.meals.filter(m => !localIds.has(m.idMeal));
+              if (newMeals.length > 0) {
+                // Fetch details for a few
+                newMeals.slice(0, 8).forEach(m => {
+                  apiFetch(`/lookup.php?i=${m.idMeal}`).then(d => {
+                    if (d.meals && d.meals[0] && !state.meals.some(x => x.idMeal === d.meals[0].idMeal)) {
+                      state.meals.push(d.meals[0]);
+                      filterAndRenderMeals();
+                    }
+                  }).catch(() => {});
+                });
+              }
+            }
+          }).catch(() => {});
+        });
+      } else {
+        loadInitialRecipes();
+      }
     }
   }
 }
@@ -2507,8 +2531,14 @@ function renderQuickIngredients() {
 }
 
 function toggleQuickIngredient(ing) {
-  if (state.selectedIngredients.some(i => i.toLowerCase() === ing.toLowerCase())) removeIngredient(ing);
-  else addIngredient(ing);
+  if (state.selectedIngredients.some(i => i.toLowerCase() === ing.toLowerCase())) {
+    removeIngredient(ing);
+    if (state.selectedIngredients.length > 0) searchByIngredients();
+    else loadInitialRecipes();
+  } else {
+    addIngredient(ing);
+    searchByIngredients();
+  }
 }
 
 function updateQuickChipStates() {
