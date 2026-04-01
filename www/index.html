@@ -1100,31 +1100,44 @@ const API_BASE = 'https://www.themealdb.com/api/json/v1/1';
 
 // ========== ARABIC → ENGLISH INGREDIENT MAP ==========
 const INGREDIENT_MAP_AR = {
-  'دجاج': 'Chicken', 'فراخ': 'Chicken', 'لحمة': 'Beef', 'لحم': 'Beef', 'بانيه': 'Chicken',
-  'بيض': 'Egg', 'أرز': 'Rice', 'رز': 'Rice', 'معكرونة': 'Pasta', 'باستا': 'Pasta',
-  'طماطم': 'Tomato', 'بندورة': 'Tomato', 'بصل': 'Onion', 'ثوم': 'Garlic',
-  'بطاطس': 'Potato', 'بطاطا': 'Potato', 'جبنة': 'Cheese', 'جبن': 'Cheese',
-  'حليب': 'Milk', 'زبدة': 'Butter', 'دقيق': 'Flour', 'سكر': 'Sugar',
-  'ليمون': 'Lemon', 'زيت زيتون': 'Olive Oil', 'زيت': 'Olive Oil',
-  'فلفل': 'Pepper', 'ملح': 'Salt', 'جزر': 'Carrot', 'فطر': 'Mushroom',
-  'سمك': 'Fish', 'جمبري': 'Shrimp', 'روبيان': 'Shrimp', 'سجق': 'Sausage',
-  'سبانخ': 'Spinach', 'بروكلي': 'Broccoli', 'أفوكادو': 'Avocado',
-  'زنجبيل': 'Ginger', 'جوز الهند': 'Coconut', 'عسل': 'Honey',
-  'كسكس': 'Couscous', 'كشري': 'Rice', 'ملوخية': 'Molokhia',
-  'فول': 'Beans', 'عدس': 'Lentils', 'حمص': 'Chickpea',
+  'دجاج': 'Chicken', 'فراخ': 'Chicken', 'جاج': 'Chicken', 'فرخة': 'Chicken', 'فراخة': 'Chicken',
+  'لحمة': 'Beef', 'لحم': 'Beef', 'لحمة بقري': 'Beef', 'بانيه': 'Chicken', 'ستيك': 'Beef',
+  'ضاني': 'Lamb', 'لحم ضاني': 'Lamb', 'خروف': 'Lamb', 'ماعز': 'Goat',
+  'سمك': 'Fish', 'فيليه': 'Fish', 'تونة': 'Tuna', 'سلمون': 'Salmon',
+  'جمبري': 'Shrimp', 'روبيان': 'Shrimp', 'جمبرى': 'Shrimp', 'كابوريا': 'Crab', 'سلطعون': 'Crab',
+  'بيض': 'Egg', 'بيضه': 'Egg', 'أرز': 'Rice', 'رز': 'Rice', 'ارز': 'Rice',
+  'معكرونة': 'Pasta', 'باستا': 'Pasta', 'مكرونة': 'Pasta', 'نودلز': 'Noodles', 'نودل': 'Noodles',
+  'طماطم': 'Tomato', 'بندورة': 'Tomato', 'طمطم': 'Tomato', 'صلصة': 'Tomato',
+  'بصل': 'Onion', 'بصلة': 'Onion', 'ثوم': 'Garlic', 'توم': 'Garlic',
+  'بطاطس': 'Potato', 'بطاطا': 'Potato', 'بطاطسا': 'Potato',
+  'جبنة': 'Cheese', 'جبن': 'Cheese', 'جبنة حلوم': 'Cheese', 'موتزاريلا': 'Cheese', 'بارميزان': 'Parmesan',
+  'حليب': 'Milk', 'زبادي': 'Yoghurt', 'زبادى': 'Yoghurt', 'لبن': 'Milk', 'روب': 'Yoghurt',
+  'زبدة': 'Butter', 'سمن': 'Butter', 'سمنة': 'Butter',
+  'دقيق': 'Flour', 'سكر': 'Sugar', 'ملح': 'Salt', 'فلفل': 'Pepper',
+  'ليمون': 'Lemon', 'حامض': 'Lemon',
+  'زيت زيتون': 'Olive Oil', 'زيت': 'Oil',
+  'جزر': 'Carrot', 'فطر': 'Mushroom', 'مشروم': 'Mushroom',
+  'سبانخ': 'Spinach', 'بروكلي': 'Broccoli', 'أفوكادو': 'Avocado', 'افوكادو': 'Avocado',
+  'زنجبيل': 'Ginger', 'جنزبيل': 'Ginger',
+  'جوز الهند': 'Coconut', 'عسل': 'Honey',
+  'كسكس': 'Couscous', 'ملوخية': 'Molokhia',
+  'فول': 'Beans', 'فاصوليا': 'Beans', 'عدس': 'Lentils', 'عدس اصفر': 'Lentils',
+  'حمص': 'Chickpea', 'حمص الشام': 'Chickpea',
   'خس': 'Lettuce', 'خيار': 'Cucumber', 'كوسة': 'Zucchini',
-  'باذنجان': 'Eggplant', 'فلفل أخضر': 'Green Pepper',
-  'كرفس': 'Celery', 'زنجبيل': 'Ginger', 'نعناع': 'Mint',
+  'باذنجان': 'Eggplant', 'فلفل أخضر': 'Green Pepper', 'فلفل اخضر': 'Green Pepper',
+  'كرفس': 'Celery', 'نعناع': 'Mint', 'نعناع اخضر': 'Mint',
   'كزبرة': 'Coriander', 'بقدونس': 'Parsley', 'شبت': 'Dill',
   'أعشاب': 'Herbs', 'بهارات': 'Spices', 'كمون': 'Cumin',
-  'كركم': 'Turmeric', 'قرفة': 'Cinnamon', 'هيل': 'Cardamom',
-  'جوزة الطيب': 'Nutmeg', 'زعفران': 'Saffron',
+  'كركم': 'Turmeric', 'قرفة': 'Cinnamon', 'هيل': 'Cardamom', 'جوزة الطيب': 'Nutmeg', 'زعفران': 'Saffron',
   'مكسرات': 'Nuts', 'لوز': 'Almonds', 'جوز': 'Walnuts',
   'فستق': 'Pistachio', 'كاجو': 'Cashew', 'تمر': 'Dates',
-  'زبيب': 'Raisins', 'شوكولاتة': 'Chocolate', 'كاكاو': 'Cocoa',
-  'قشطة': 'Cream', 'كريمة': 'Cream', 'نشا': 'Starch',
-  'خميرة': 'Yeast', 'فانيليا': 'Vanilla', 'ماء ورد': 'Rose Water',
-  'ماء زهر': 'Orange Blossom Water'
+  'زبيب': 'Raisins', 'شوكولاتة': 'Chocolate', 'شوكولاته': 'Chocolate', 'كاكاو': 'Cocoa',
+  'قشطة': 'Cream', 'كريمة': 'Cream', 'كريمه': 'Cream', 'نشا': 'Starch',
+  'خميرة': 'Yeast', 'فانيليا': 'Vanilla', 'فانيلا': 'Vanilla',
+  'ماء ورد': 'Rose Water', 'ماء زهر': 'Orange Blossom Water',
+  'بط': 'Duck', 'ديك رومي': 'Turkey', 'تركي': 'Turkey',
+  'سجق': 'Sausage', 'نقانق': 'Sausage', 'سلامي': 'Salami', 'بيكون': 'Bacon',
+  'شرائح اللحم': 'Beef', 'مينس': 'Mince'
 };
 
 // Translate Arabic ingredient to English
@@ -1630,8 +1643,17 @@ async function loadByArea(area) {
 
 // ========== INGREDIENT SEARCH (CORE) ==========
 async function searchByIngredients() {
+  // FIX: Also read from search input if nothing is in tags yet
+  const input = document.getElementById('searchInput');
+  if (input && input.value.trim()) {
+    input.value.split(/[,،]+/).forEach(v => {
+      const t = v.trim();
+      if (t) addIngredient(t);
+    });
+    input.value = '';
+  }
   const ingredients = state.selectedIngredients;
-  if (ingredients.length === 0) { showToast('أضف مكونات أولاً!'); return; }
+  if (ingredients.length === 0) { showToast(state.language === 'ar' ? 'أضف مكونات أولاً!' : 'Add ingredients first!'); return; }
   showLoading(t('loading'));
   try {
     const promises = ingredients.map(ing =>
@@ -1643,17 +1665,25 @@ async function searchByIngredients() {
     const allEmpty = results.every(r => r.length === 0);
 
     if (allEmpty) {
-      // Use fallback recipes - filter by ingredients
+      // Use fallback recipes - filter by ingredients OR recipe name
       const selectedLower = ingredients.map(i => i.toLowerCase());
+      const selectedArabic = ingredients.map(i => {
+        const entry = Object.entries(INGREDIENT_MAP_AR).find(([ar,en]) => en.toLowerCase() === i.toLowerCase());
+        return entry ? entry[0].toLowerCase() : i.toLowerCase();
+      });
       state.allIngredientMeals = FALLBACK_RECIPES.filter(meal => {
         const mealIngredients = [];
         for (let i = 1; i <= 20; i++) {
           const ing = meal[`strIngredient${i}`];
           if (ing && ing.trim()) mealIngredients.push(ing.trim().toLowerCase());
         }
-        return selectedLower.every(sel =>
+        // Match if any ingredient matches OR recipe name contains the search term
+        const nameMatch = selectedLower.some(sel => meal.strMeal.toLowerCase().includes(sel))
+          || selectedArabic.some(sel => meal.strMeal.toLowerCase().includes(sel));
+        const ingredientMatch = selectedLower.every(sel =>
           mealIngredients.some(mi => mi.includes(sel) || sel.includes(mi))
         );
+        return ingredientMatch || nameMatch;
       });
     } else if (results.length === 1) {
       state.allIngredientMeals = results[0];
@@ -1668,17 +1698,24 @@ async function searchByIngredients() {
     filterAndRenderMeals();
     showIngredientSuggestions();
   } catch (e) {
-    // Final fallback
+    // Final fallback - match by ingredients OR recipe name
     const selectedLower = state.selectedIngredients.map(i => i.toLowerCase());
+    const selectedArabic = state.selectedIngredients.map(i => {
+      const entry = Object.entries(INGREDIENT_MAP_AR).find(([ar,en]) => en.toLowerCase() === i.toLowerCase());
+      return entry ? entry[0].toLowerCase() : i.toLowerCase();
+    });
     state.meals = FALLBACK_RECIPES.filter(meal => {
       const mealIngredients = [];
       for (let i = 1; i <= 20; i++) {
         const ing = meal[`strIngredient${i}`];
         if (ing && ing.trim()) mealIngredients.push(ing.trim().toLowerCase());
       }
-      return selectedLower.every(sel =>
+      const nameMatch = selectedLower.some(sel => meal.strMeal.toLowerCase().includes(sel))
+        || selectedArabic.some(sel => meal.strMeal.toLowerCase().includes(sel));
+      const ingredientMatch = selectedLower.every(sel =>
         mealIngredients.some(mi => mi.includes(sel) || sel.includes(mi))
       );
+      return ingredientMatch || nameMatch;
     });
     filterAndRenderMeals();
   }
@@ -1719,10 +1756,16 @@ function filterAndRenderMeals() {
   let meals = [...state.meals];
   if (state.activeCategory !== 'all') {
     const allowedCats = CATEGORY_MAP[state.activeCategory] || [];
-    if (allowedCats.length > 0) meals = meals.filter(m => allowedCats.includes(m.strCategory));
+    if (allowedCats.length > 0) {
+      const filtered = meals.filter(m => allowedCats.includes(m.strCategory));
+      // FIX: Don't zero out results if filter removes everything
+      if (filtered.length > 0 || meals.length === 0) meals = filtered;
+    }
   }
   if (state.activeCuisine) {
-    meals = meals.filter(m => m.strArea === state.activeCuisine);
+    const filtered = meals.filter(m => m.strArea === state.activeCuisine);
+    // FIX: Don't zero out results if filter removes everything
+    if (filtered.length > 0 || meals.length === 0) meals = filtered;
   }
   state.meals = meals;
   renderRecipes();
