@@ -46,6 +46,25 @@
       --font-main: 'Tajawal', 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --header-shadow: 0 4px 20px rgba(232,85,58,0.3);
+      --modal-bg: rgba(0,0,0,0.5);
+    }
+
+    /* ========== DARK MODE ========== */
+    [data-theme="dark"] {
+      --bg: #1A1210;
+      --bg-card: #2C2018;
+      --bg-warm: #3A2A1E;
+      --text: #F5E8E0;
+      --text-light: #C4A898;
+      --text-muted: #8B7568;
+      --border: #4A3828;
+      --border-light: #3A2A1E;
+      --shadow: 0 2px 12px rgba(0,0,0,0.3);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+      --shadow-xl: 0 16px 48px rgba(0,0,0,0.5);
+      --header-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      --modal-bg: rgba(0,0,0,0.7);
     }
 
     html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
@@ -67,6 +86,10 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       transition: opacity 0.5s ease, visibility 0.5s ease;
     }
+    [data-theme="dark"] #splash-screen {
+      background: linear-gradient(135deg, #1A1210 0%, #2C2018 50%, #3A2A1E 100%);
+    }
+    [data-theme="dark"] #splash-screen .splash-subtitle { color: #8B7568; }
     #splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
     #splash-screen .splash-icon { width: 120px; height: 120px; animation: splashBounce 1.2s ease infinite; }
     #splash-screen .splash-title {
@@ -92,7 +115,8 @@
     .app-header {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: white; padding: 16px 20px; position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 4px 20px rgba(232,85,58,0.3);
+      box-shadow: var(--header-shadow);
+      transition: background 0.3s, box-shadow 0.3s;
     }
     .header-top {
       display: flex; align-items: center; justify-content: space-between;
@@ -476,6 +500,7 @@
     }
     .settings-item-icon { font-size: 1.3rem; }
     .settings-item-value { font-size: 0.85rem; color: var(--text-muted); }
+    .settings-item-arrow { color: var(--text-muted); font-size: 1.2rem; font-weight: 300; margin-inline-start: auto; }
     .lang-options { display: flex; gap: 8px; margin-top: 10px; }
     .lang-btn {
       flex: 1; padding: 10px; border-radius: var(--radius-sm);
@@ -508,6 +533,109 @@
       white-space: nowrap; pointer-events: none;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ========== DARK MODE OVERRIDES ========== */
+    [data-theme="dark"] .quick-chip.selected { background: #2A3A2A; }
+    [data-theme="dark"] .cat-tab.active { background: var(--primary); color: white; }
+    [data-theme="dark"] .chip.chip-cuisine.active { background: var(--secondary); }
+    [data-theme="dark"] .recipe-card { border-color: var(--border); }
+    [data-theme="dark"] .recipe-card-img { filter: brightness(0.9); }
+    [data-theme="dark"] .modal-content { background: var(--bg-card); }
+    [data-theme="dark"] .modal-body { color: var(--text); }
+    [data-theme="dark"] .settings-panel { background: var(--bg-card); }
+    [data-theme="dark"] .settings-group-title { color: var(--text-light); }
+    [data-theme="dark"] .settings-item { border-color: var(--border); }
+    [data-theme="dark"] .settings-item-label { color: var(--text); }
+    [data-theme="dark"] .settings-item-value { color: var(--text-muted); }
+    [data-theme="dark"] .instructions-text { color: var(--text-light); }
+    [data-theme="dark"] .toast { background: #3A2A1E; color: var(--text); }
+    [data-theme="dark"] .empty-state .empty-title { color: var(--text); }
+    [data-theme="dark"] .empty-state .empty-desc { color: var(--text-muted); }
+    [data-theme="dark"] .error-state { color: var(--text-light); }
+    [data-theme="dark"] .loading-text { color: var(--text-muted); }
+    [data-theme="dark"] .suggestions-panel { background: var(--bg-warm); }
+    [data-theme="dark"] .search-main-btn { filter: brightness(1.1); }
+    [data-theme="dark"] .ingredient-tag { filter: brightness(0.9); }
+
+    /* Dark mode toggle button */
+    .theme-toggle {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: rgba(255,255,255,0.18); border: none;
+      color: white; font-size: 1.2rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.3s;
+    }
+    .theme-toggle:active { background: rgba(255,255,255,0.3); transform: rotate(180deg); }
+
+    /* About/Info pages */
+    .info-page-overlay {
+      position: fixed; inset: 0; background: var(--modal-bg); z-index: 200;
+      opacity: 0; visibility: hidden; transition: all 0.3s ease;
+    }
+    .info-page-overlay.active { opacity: 1; visibility: visible; }
+    .info-page {
+      position: fixed; top: 0; right: 0; bottom: 0; left: 0;
+      background: var(--bg); z-index: 201;
+      transform: translateX(100%); transition: transform 0.35s ease;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+    }
+    [dir="rtl"] .info-page { transform: translateX(-100%); }
+    .info-page.active { transform: translateX(0); }
+    .info-page-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white; padding: 20px; display: flex; align-items: center; gap: 12px;
+      position: sticky; top: 0; z-index: 5;
+      box-shadow: var(--header-shadow);
+    }
+    .info-page-back {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: rgba(255,255,255,0.18); border: none;
+      color: white; font-size: 1.2rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .info-page-title { font-size: 1.2rem; font-weight: 700; }
+    .info-page-body {
+      padding: 24px 20px; max-width: 800px; margin: 0 auto;
+      line-height: 1.9; color: var(--text);
+    }
+    .info-page-body h2 {
+      color: var(--primary); font-size: 1.3rem; margin: 28px 0 12px;
+      padding-bottom: 8px; border-bottom: 2px solid var(--border);
+    }
+    .info-page-body h3 { color: var(--text); font-size: 1.1rem; margin: 20px 0 8px; }
+    .info-page-body p { margin-bottom: 14px; color: var(--text-light); }
+    .info-page-body ul { margin-bottom: 14px; padding: 0 20px; }
+    .info-page-body li { margin-bottom: 8px; color: var(--text-light); }
+    .info-page-body .highlight-box {
+      background: var(--bg-warm); border-radius: var(--radius-sm);
+      padding: 16px; margin: 16px 0; border-right: 4px solid var(--primary);
+    }
+    [dir="ltr"] .info-page-body .highlight-box { border-right: none; border-left: 4px solid var(--primary); }
+    .info-page-body .app-info-card {
+      text-align: center; padding: 32px 20px;
+      background: var(--bg-card); border-radius: var(--radius);
+      box-shadow: var(--shadow); margin-bottom: 24px;
+    }
+    .info-page-body .app-info-card img { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 16px; }
+    .info-page-body .app-info-card h1 { font-size: 1.6rem; color: var(--primary); margin-bottom: 4px; }
+    .info-page-body .app-info-card .version { color: var(--text-muted); font-size: 0.9rem; }
+    .info-page-body .feature-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0;
+    }
+    .info-page-body .feature-item {
+      background: var(--bg-card); border-radius: var(--radius-sm);
+      padding: 16px; text-align: center; box-shadow: var(--shadow);
+    }
+    .info-page-body .feature-item .emoji { font-size: 2rem; display: block; margin-bottom: 8px; }
+    .info-page-body .feature-item .label { font-size: 0.85rem; color: var(--text-light); font-weight: 600; }
+    .info-page-body .contact-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 0; border-bottom: 1px solid var(--border);
+    }
+    .info-page-body .contact-item:last-child { border: none; }
+    .info-page-body .contact-icon { font-size: 1.4rem; }
+    .info-page-body .contact-label { font-size: 0.85rem; color: var(--text-muted); }
+    .info-page-body .contact-value { font-size: 0.95rem; color: var(--text); font-weight: 600; }
 
     /* ========== RESPONSIVE ========== */
     @media (min-width: 480px) {
@@ -570,6 +698,7 @@
       </div>
     </div>
     <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="تبديل المظهر" title="ليل/نهار">🌙</button>
       <button class="header-btn" onclick="showSettings()" aria-label="الإعدادات" title="الإعدادات">⚙️</button>
     </div>
   </div>
@@ -618,7 +747,7 @@
     <div class="search-section">
       <div class="search-row">
         <span class="search-icon">🥘</span>
-        <input type="text" id="searchInput" placeholder="اكتب مكون واضغط ＋ (مثل: chicken, rice, tomato)..."
+        <input type="text" id="searchInput" placeholder="اكتب مكون بالعربي أو الإنجليزي واضغط ＋ (مثل: دجاج, chicken, طماطم)..."
                onkeydown="if(event.key==='Enter') addIngredientFromInput()">
         <button class="add-ingredient-btn" onclick="addIngredientFromInput()" title="إضافة مكون">＋</button>
       </div>
@@ -730,7 +859,25 @@
     <div class="settings-item" onclick="shareApp()">
       <div class="settings-item-label"><span class="settings-item-icon">📤</span>مشاركة التطبيق</div>
     </div>
-    <button class="rate-btn" onclick="rateApp()">⭐ قيّم التطبيق</button>
+    <div class="settings-item" onclick="rateApp()">
+      <div class="settings-item-label"><span class="settings-item-icon">⭐</span>قيّم التطبيق</div>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group-title">معلومات</div>
+    <div class="settings-item" onclick="openInfoPage('about')">
+      <div class="settings-item-label"><span class="settings-item-icon">👨‍🍳</span>من نحن</div>
+      <span class="settings-item-arrow">›</span>
+    </div>
+    <div class="settings-item" onclick="openInfoPage('privacy')">
+      <div class="settings-item-label"><span class="settings-item-icon">🔒</span>سياسة الخصوصية</div>
+      <span class="settings-item-arrow">›</span>
+    </div>
+    <div class="settings-item" onclick="openInfoPage('terms')">
+      <div class="settings-item-label"><span class="settings-item-icon">📋</span>شروط الاستخدام</div>
+      <span class="settings-item-arrow">›</span>
+    </div>
   </div>
 
   <div class="settings-group">
@@ -740,16 +887,187 @@
       <span class="settings-item-value">1.0.0</span>
     </div>
     <div class="settings-item">
-      <div class="settings-item-label"><span class="settings-item-icon">🍲</span>ست الكل — Set El Kol</div>
-    </div>
-    <div class="settings-item">
       <div class="settings-item-label"><span class="settings-item-icon">📊</span>البيانات: TheMealDB API</div>
     </div>
+    <div class="settings-item">
+      <div class="settings-item-label"><span class="settings-item-icon">🍳</span>وصفات احتياطية: 15 وصفة</div>
+    </div>
   </div>
+
+  <p style="text-align:center; color:var(--text-muted); font-size:0.75rem; padding:16px 0;">
+    صنع بـ ❤️ — © 2026 ست الكل
+  </p>
 </div>
 
 <!-- ========== TOAST ========== -->
 <div class="toast" id="toast"></div>
+
+<!-- ========== ABOUT PAGE ========== -->
+<div class="info-page-overlay" id="aboutOverlay" onclick="closeInfoPage('about')"></div>
+<div class="info-page" id="aboutPage">
+  <div class="info-page-header">
+    <button class="info-page-back" onclick="closeInfoPage('about')">✕</button>
+    <span class="info-page-title">من نحن</span>
+  </div>
+  <div class="info-page-body">
+    <div class="app-info-card">
+      <img src="icon-192.png" alt="ست الكل">
+      <h1>ست الكل</h1>
+      <p style="color:var(--primary); font-weight:600;">Set El Kol</p>
+      <span class="version">الإصدار 1.0.0</span>
+    </div>
+
+    <p>ست الكل هو تطبيق ذكي لاكتشاف الوصفات، صُمم بحب لعشاق الطبخ في العالم العربي والعالم. 🍳</p>
+
+    <div class="highlight-box">
+      <strong>🎯 مهمتنا:</strong> نجعل الطبخ أسهل وأمتع من خلال مساعدتك في إيجاد وصفات لذيذة بناءً على المكونات المتوفرة لديك!
+    </div>
+
+    <h2>✨ المميزات</h2>
+    <div class="feature-grid">
+      <div class="feature-item"><span class="emoji">🔍</span><span class="label">بحث بالمكونات</span></div>
+      <div class="feature-item"><span class="emoji">🌍</span><span class="label">21 مطبخ عالمي</span></div>
+      <div class="feature-item"><span class="emoji">❤️</span><span class="label">حفظ المفضلة</span></div>
+      <div class="feature-item"><span class="emoji">📴</span><span class="label">يعمل بدون نت</span></div>
+      <div class="feature-item"><span class="emoji">🌙</span><span class="label">وضع ليلي</span></div>
+      <div class="feature-item"><span class="emoji">🌐</span><span class="label">3 لغات</span></div>
+      <div class="feature-item"><span class="emoji">📤</span><span class="label">مشاركة الوصفات</span></div>
+      <div class="feature-item"><span class="emoji">🎲</span><span class="label">وصفة عشوائية</span></div>
+    </div>
+
+    <h2>👨‍🍳 عن المطور</h2>
+    <p>تم تطوير ست الكل بشغف لتقديم تجربة طبخ فريدة وسهلة. نؤمن بأن الطبخ يجب أن يكون ممتعاً ومتاحاً للجميع.</p>
+
+    <h2>📊 مصدر البيانات</h2>
+    <p>تُقدم الوصفات من قاعدة بيانات <strong>TheMealDB</strong> العالمية، مع وصفات احتياطية مدمجة لضمان عمل التطبيق حتى بدون اتصال بالإنترنت.</p>
+
+    <h2>📞 تواصل معنا</h2>
+    <div class="contact-item">
+      <span class="contact-icon">📧</span>
+      <div><div class="contact-label">البريد الإلكتروني</div><div class="contact-value">galalemad75@gmail.com</div></div>
+    </div>
+    <div class="contact-item">
+      <span class="contact-icon">🐙</span>
+      <div><div class="contact-label">GitHub</div><div class="contact-value">galalemad75-creator</div></div>
+    </div>
+
+    <p style="text-align:center; margin-top:32px; color:var(--text-muted); font-size:0.85rem;">
+      صنع بـ ❤️ في مصر — Made with ❤️ in Egypt<br>
+      © 2026 ست الكل — Set El Kol. جميع الحقوق محفوظة.
+    </p>
+  </div>
+</div>
+
+<!-- ========== PRIVACY POLICY PAGE ========== -->
+<div class="info-page-overlay" id="privacyOverlay" onclick="closeInfoPage('privacy')"></div>
+<div class="info-page" id="privacyPage">
+  <div class="info-page-header">
+    <button class="info-page-back" onclick="closeInfoPage('privacy')">✕</button>
+    <span class="info-page-title">سياسة الخصوصية</span>
+  </div>
+  <div class="info-page-body">
+    <p style="color:var(--text-muted); font-size:0.85rem;">آخر تحديث: يناير 2026</p>
+
+    <div class="highlight-box">
+      <strong>🔒 ملخص سريع:</strong> نحن لا نجمع أي بيانات شخصية. بياناتك محفوظة على جهازك فقط.
+    </div>
+
+    <h2>المقدمة</h2>
+    <p>يلتزم تطبيق "ست الكل" (Set El Kol) بحماية خصوصيتك. توضح سياسة الخصوصية هذه كيفية تعاملنا مع المعلومات عند استخدامك للتطبيق.</p>
+
+    <h2>المعلومات التي نجمعها</h2>
+    <p><strong>نحن لا نجمع أو نخزن أو ننقل أي معلومات شخصية.</strong></p>
+    <ul>
+      <li><strong>لا يتطلب حساب:</strong> يمكنك استخدام التطبيق دون إنشاء حساب أو تقديم أي بيانات شخصية.</li>
+      <li><strong>لا تحليلات:</strong> لا نستخدم أي خدمات تحليلات أو أدوات تتبع.</li>
+      <li><strong>لا ملفات تعريف ارتباط:</strong> لا يستخدم التطبيق ملفات تعريف الارتباط.</li>
+      <li><strong>لا بيانات موقع:</strong> لا نصل إلى بيانات موقعك الجغرافي.</li>
+    </ul>
+
+    <h2>الخدمات الخارجية</h2>
+    <p>يستخدم التطبيق واجهة برمجة التطبيقات <strong>TheMealDB</strong> لجلب بيانات الوصفات. عند البحث أو عرض الوصفات، يتم إرسال طلبات إلى خوادم TheMealDB وقد تتضمن:</p>
+    <ul>
+      <li>استعلام البحث (اسم الوصفة أو المكون)</li>
+      <li>عنوان IP الخاص بجهازك (يُرسل تلقائياً)</li>
+    </ul>
+
+    <h2>البيانات المخزنة محلياً</h2>
+    <p>يخزن التطبيق البيانات التالية محلياً على جهازك:</p>
+    <ul>
+      <li><strong>الوصفات المفضلة:</strong> قائمة الوصفات التي حفظتها</li>
+      <li><strong>تفضيل اللغة:</strong> اللغة التي اخترتها</li>
+      <li><strong>إعداد المظهر:</strong> تفضيل الوضع الليلي أو النهاري</li>
+    </ul>
+    <p>هذه البيانات لا تغادر جهازك أبداً. يمكنك مسحها في أي وقت من خلال "مسح الكاش" في الإعدادات.</p>
+
+    <h2>أطفال</h2>
+    <p>التطبيق مناسب لجميع الأعمار. لا نجمع أي بيانات من الأطفال أو البالغين.</p>
+
+    <h2>التغييرات على هذه السياسة</h2>
+    <p>قد نحدث سياسة الخصوصية هذه من وقت لآخر. سيتم نشر أي تغييرات في هذه الصفحة مع تحديث تاريخ "آخر تحديث".</p>
+
+    <h2>اتصل بنا</h2>
+    <p>إذا كان لديك أي أسئلة حول سياسة الخصوصية، يرجى التواصل معنا على: <strong>galalemad75@gmail.com</strong></p>
+  </div>
+</div>
+
+<!-- ========== TERMS OF SERVICE PAGE ========== -->
+<div class="info-page-overlay" id="termsOverlay" onclick="closeInfoPage('terms')"></div>
+<div class="info-page" id="termsPage">
+  <div class="info-page-header">
+    <button class="info-page-back" onclick="closeInfoPage('terms')">✕</button>
+    <span class="info-page-title">شروط الاستخدام</span>
+  </div>
+  <div class="info-page-body">
+    <p style="color:var(--text-muted); font-size:0.85rem;">آخر تحديث: يناير 2026</p>
+
+    <h2>1. قبول الشروط</h2>
+    <p>بتحميل أو تثبيت أو استخدام تطبيق "ست الكل"، فإنك توافق على الالتزام بشروط الاستخدام هذه. إذا كنت لا توافق على هذه الشروط، يرجى عدم استخدام التطبيق.</p>
+
+    <h2>2. وصف الخدمة</h2>
+    <p>ست الكل هو تطبيق لاكتشاف الوصفات يتيح للمستخدمين:</p>
+    <ul>
+      <li>البحث عن الوصفات بالاسم أو المكونات</li>
+      <li>تصفح الوصفات حسب نوع المطبخ وتصنيف الطبق</li>
+      <li>حفظ الوصفات المفضلة محلياً</li>
+      <li>مشاركة روابط الوصفات مع الآخرين</li>
+      <li>عرض تعليمات الطهي ومقاطع الفيديو</li>
+    </ul>
+
+    <h2>3. خدمة مجانية</h2>
+    <p>يُقدم ست الكل مجاناً بالكامل. لا توجد عمليات شراء داخل التطبيق أو اشتراكات أو إعلانات.</p>
+
+    <h2>4. مسؤوليات المستخدم</h2>
+    <p>بصفتك مستخدماً، فإنك توافق على:</p>
+    <ul>
+      <li>استخدام التطبيق لأغراض قانونية فقط</li>
+      <li>عدم محاولة هندسة عكسية أو تعديل التطبيق</li>
+      <li>عدم استخدام التطبيق بطريقة قد تضر به أو تعطله</li>
+    </ul>
+
+    <h2>5. دقة الوصفات</h2>
+    <p>تُقدم بيانات الوصفات من TheMealDB. نحن لا نضمن دقة الوصفات أو قيمتها الغذائية. يجب على المستخدمين:</p>
+    <ul>
+      <li>استخدام حكمهم الخاص فيما يتعلق بسلامة الطعام والحساسية</li>
+      <li>التحقق من المكونات قبل الطهي</li>
+    </ul>
+
+    <h2>6. الملكية الفكرية</h2>
+    <p>التطبيق وشعاراته محمية بموجب حقوق الملكية الفكرية. الوصفات وبيانات الطعام مقدمة من TheMealDB.</p>
+
+    <h2>7. إخلاء المسؤولية</h2>
+    <p>يُقدم التطبيق "كما هو" دون أي ضمانات. لا نضمن أن التطبيق سيكون خالياً من الأخطاء أو متاحاً باستمرار.</p>
+
+    <h2>8. تحديد المسؤولية</h2>
+    <p>لن نكون مسؤولين عن أي أضرار مباشرة أو غير مباشرة ناتجة عن استخدام أو عدم القدرة على استخدام التطبيق.</p>
+
+    <h2>9. التغييرات</h2>
+    <p>نحتفظ بالحق في تعديل هذه الشروط في أي وقت. استمرارك في استخدام التطبيق يعني موافقتك على الشروط المحدثة.</p>
+
+    <h2>10. اتصل بنا</h2>
+    <p>لأي استفسارات: <strong>galalemad75@gmail.com</strong></p>
+  </div>
+</div>
 
 <!-- ========== JAVASCRIPT ========== -->
 <script>
@@ -777,12 +1095,208 @@ const state = {
 // ========== API ==========
 const API_BASE = 'https://www.themealdb.com/api/json/v1/1';
 
-// ========== QUICK INGREDIENTS ==========
+// ========== ARABIC → ENGLISH INGREDIENT MAP ==========
+const INGREDIENT_MAP_AR = {
+  'دجاج': 'Chicken', 'فراخ': 'Chicken', 'لحمة': 'Beef', 'لحم': 'Beef', 'بانيه': 'Chicken',
+  'بيض': 'Egg', 'أرز': 'Rice', 'رز': 'Rice', 'معكرونة': 'Pasta', 'باستا': 'Pasta',
+  'طماطم': 'Tomato', 'بندورة': 'Tomato', 'بصل': 'Onion', 'ثوم': 'Garlic',
+  'بطاطس': 'Potato', 'بطاطا': 'Potato', 'جبنة': 'Cheese', 'جبن': 'Cheese',
+  'حليب': 'Milk', 'زبدة': 'Butter', 'دقيق': 'Flour', 'سكر': 'Sugar',
+  'ليمون': 'Lemon', 'زيت زيتون': 'Olive Oil', 'زيت': 'Olive Oil',
+  'فلفل': 'Pepper', 'ملح': 'Salt', 'جزر': 'Carrot', 'فطر': 'Mushroom',
+  'سمك': 'Fish', 'جمبري': 'Shrimp', 'روبيان': 'Shrimp', 'سجق': 'Sausage',
+  'سبانخ': 'Spinach', 'بروكلي': 'Broccoli', 'أفوكادو': 'Avocado',
+  'زنجبيل': 'Ginger', 'جوز الهند': 'Coconut', 'عسل': 'Honey',
+  'كسكس': 'Couscous', 'كشري': 'Rice', 'ملوخية': 'Molokhia',
+  'فول': 'Beans', 'عدس': 'Lentils', 'حمص': 'Chickpea',
+  'خس': 'Lettuce', 'خيار': 'Cucumber', 'كوسة': 'Zucchini',
+  'باذنجان': 'Eggplant', 'فلفل أخضر': 'Green Pepper',
+  'كرفس': 'Celery', 'زنجبيل': 'Ginger', 'نعناع': 'Mint',
+  'كزبرة': 'Coriander', 'بقدونس': 'Parsley', 'شبت': 'Dill',
+  'أعشاب': 'Herbs', 'بهارات': 'Spices', 'كمون': 'Cumin',
+  'كركم': 'Turmeric', 'قرفة': 'Cinnamon', 'هيل': 'Cardamom',
+  'جوزة الطيب': 'Nutmeg', 'زعفران': 'Saffron',
+  'مكسرات': 'Nuts', 'لوز': 'Almonds', 'جوز': 'Walnuts',
+  'فستق': 'Pistachio', 'كاجو': 'Cashew', 'تمر': 'Dates',
+  'زبيب': 'Raisins', 'شوكولاتة': 'Chocolate', 'كاكاو': 'Cocoa',
+  'قشطة': 'Cream', 'كريمة': 'Cream', 'نشا': 'Starch',
+  'خميرة': 'Yeast', 'فانيليا': 'Vanilla', 'ماء ورد': 'Rose Water',
+  'ماء زهر': 'Orange Blossom Water'
+};
+
+// Translate Arabic ingredient to English
+function translateIngredient(input) {
+  const trimmed = input.trim();
+  // Check exact match first
+  if (INGREDIENT_MAP_AR[trimmed]) return INGREDIENT_MAP_AR[trimmed];
+  // Check case-insensitive
+  const lower = trimmed.toLowerCase();
+  for (const [ar, en] of Object.entries(INGREDIENT_MAP_AR)) {
+    if (ar.toLowerCase() === lower) return en;
+  }
+  // Return as-is (assume English)
+  return trimmed;
+}
+
+// ========== QUICK INGREDIENTS (bilingual) ==========
 const QUICK_INGREDIENTS = [
-  'Chicken','Beef','Egg','Rice','Pasta','Tomato','Onion','Garlic',
-  'Potato','Cheese','Milk','Butter','Flour','Sugar','Lemon','Olive Oil',
-  'Pepper','Salt','Carrot','Mushroom','Fish','Shrimp','Bacon','Sausage',
-  'Spinach','Broccoli','Avocado','Ginger','Coconut','Honey'
+  { en: 'Chicken', ar: 'دجاج 🍗' },
+  { en: 'Beef', ar: 'لحمة 🥩' },
+  { en: 'Egg', ar: 'بيض 🥚' },
+  { en: 'Rice', ar: 'أرز 🍚' },
+  { en: 'Pasta', ar: 'معكرونة 🍝' },
+  { en: 'Tomato', ar: 'طماطم 🍅' },
+  { en: 'Onion', ar: 'بصل 🧅' },
+  { en: 'Garlic', ar: 'ثوم 🧄' },
+  { en: 'Potato', ar: 'بطاطس 🥔' },
+  { en: 'Cheese', ar: 'جبنة 🧀' },
+  { en: 'Butter', ar: 'زبدة 🧈' },
+  { en: 'Lemon', ar: 'ليمون 🍋' },
+  { en: 'Fish', ar: 'سمك 🐟' },
+  { en: 'Shrimp', ar: 'جمبري 🦐' },
+  { en: 'Mushroom', ar: 'فطر 🍄' },
+  { en: 'Carrot', ar: 'جزر 🥕' },
+  { en: 'Spinach', ar: 'سبانخ 🥬' },
+  { en: 'Coconut', ar: 'جوز الهند 🥥' },
+  { en: 'Honey', ar: 'عسل 🍯' },
+  { en: 'Chocolate', ar: 'شوكولاتة 🍫' },
+];
+
+// ========== EMBEDDED FALLBACK RECIPES ==========
+const FALLBACK_RECIPES = [
+  {
+    idMeal: "fb001", strMeal: " كبسة دجاج (Kabsa Chicken)", strCategory: "Chicken", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/g07w8f1699013089.jpg",
+    strIngredient1: "Chicken", strIngredient2: "Rice", strIngredient3: "Onion", strIngredient4: "Tomato",
+    strIngredient5: "Garlic", strIngredient6: "Lemon", strIngredient7: "Pepper", strIngredient8: "Salt",
+    strMeasure1: "1 kg", strMeasure2: "3 cups", strMeasure3: "2", strMeasure4: "3",
+    strMeasure5: "4 cloves", strMeasure6: "1", strMeasure7: "1 tsp", strMeasure8: "to taste",
+    strInstructions: "1. Season chicken with spices.\n2. Fry onion and garlic.\n3. Add tomato and cook.\n4. Add chicken and water.\n5. Cook rice separately.\n6. Serve chicken over rice."
+  },
+  {
+    idMeal: "fb002", strMeal: "شاورما دجاج (Chicken Shawarma)", strCategory: "Chicken", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/k420tj1585565244.jpg",
+    strIngredient1: "Chicken", strIngredient2: "Onion", strIngredient3: "Lemon", strIngredient4: "Garlic",
+    strIngredient5: "Pepper", strIngredient6: "Salt", strIngredient7: "Olive Oil",
+    strMeasure1: "500g", strMeasure2: "1", strMeasure3: "1", strMeasure4: "3 cloves",
+    strMeasure5: "1 tsp", strMeasure6: "to taste", strMeasure7: "2 tbsp",
+    strInstructions: "1. Marinate chicken with lemon, garlic, and spices for 2 hours.\n2. Grill or pan-fry until cooked.\n3. Slice thinly.\n4. Serve in bread with garlic sauce and pickles."
+  },
+  {
+    idMeal: "fb003", strMeal: "ملوخية (Molokhia)", strCategory: "Side", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/58oia61564916529.jpg",
+    strIngredient1: "Chicken", strIngredient2: "Garlic", strIngredient3: "Onion", strIngredient4: "Lemon",
+    strIngredient5: "Salt", strIngredient6: "Pepper",
+    strMeasure1: "stock", strMeasure2: "6 cloves", strMeasure3: "1", strMeasure4: "1",
+    strMeasure5: "to taste", strMeasure6: "to taste",
+    strInstructions: "1. Prepare chicken stock.\n2. Chop molokhia leaves finely.\n3. Fry garlic in ghee.\n4. Add stock and bring to boil.\n5. Add molokhia and cook 5 min.\n6. Serve with rice and lemon."
+  },
+  {
+    idMeal: "fb004", strMeal: "بيتزا margherita (Pizza Margherita)", strCategory: "Miscellaneous", strArea: "Italian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/x0lk931587671540.jpg",
+    strIngredient1: "Flour", strIngredient2: "Tomato", strIngredient3: "Cheese", strIngredient4: "Olive Oil",
+    strIngredient5: "Garlic", strIngredient6: "Salt",
+    strMeasure1: "300g", strMeasure2: "4", strMeasure3: "200g", strMeasure4: "2 tbsp",
+    strMeasure5: "2 cloves", strMeasure6: "to taste",
+    strInstructions: "1. Make dough with flour, water, yeast.\n2. Let rise 1 hour.\n3. Spread tomato sauce.\n4. Add mozzarella cheese.\n5. Bake at 220°C for 12-15 min.\n6. Drizzle olive oil and serve."
+  },
+  {
+    idMeal: "fb005", strMeal: "شكشوكة (Shakshuka)", strCategory: "Breakfast", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/g373701551450225.jpg",
+    strIngredient1: "Egg", strIngredient2: "Tomato", strIngredient3: "Onion", strIngredient4: "Garlic",
+    strIngredient5: "Pepper", strIngredient6: "Salt", strIngredient7: "Olive Oil",
+    strMeasure1: "4", strMeasure2: "4", strMeasure3: "1", strMeasure4: "3 cloves",
+    strMeasure5: "1 tsp", strMeasure6: "to taste", strMeasure7: "2 tbsp",
+    strInstructions: "1. Fry onion and garlic in olive oil.\n2. Add chopped tomatoes and cook 10 min.\n3. Season with salt, pepper, cumin.\n4. Make wells and crack eggs.\n5. Cover and cook until eggs set.\n6. Serve with bread."
+  },
+  {
+    idMeal: "fb006", strMeal: "بسبوسة (Basbousa)", strCategory: "Dessert", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/y1wpw11511641833.jpg",
+    strIngredient1: "Flour", strIngredient2: "Sugar", strIngredient3: "Butter", strIngredient4: "Egg",
+    strIngredient5: "Coconut", strIngredient6: "Milk",
+    strMeasure1: "2 cups", strMeasure2: "1 cup", strMeasure3: "100g", strMeasure4: "2",
+    strMeasure5: "1/2 cup", strMeasure6: "1 cup",
+    strInstructions: "1. Mix semolina, coconut, sugar.\n2. Add melted butter and eggs.\n3. Add milk and mix well.\n4. Pour into greased pan.\n5. Bake at 180°C for 30 min.\n6. Pour sugar syrup on top. Cut and serve."
+  },
+  {
+    idMeal: "fb007", strMeal: "كنافة (Kunafa)", strCategory: "Dessert", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/n32d7e1598112774.jpg",
+    strIngredient1: "Flour", strIngredient2: "Butter", strIngredient3: "Cheese", strIngredient4: "Sugar",
+    strIngredient5: "Milk",
+    strMeasure1: "500g shredded", strMeasure2: "200g", strMeasure3: "300g", strMeasure4: "2 cups",
+    strMeasure5: "1 cup",
+    strInstructions: "1. Mix shredded dough with melted butter.\n2. Press half into pan.\n3. Add cheese layer.\n4. Top with remaining dough.\n5. Bake until golden.\n6. Pour syrup and add pistachios."
+  },
+  {
+    idMeal: "fb008", strMeal: "فول مدمس (Ful Medames)", strCategory: "Breakfast", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/qrttys1511813187.jpg",
+    strIngredient1: "Beans", strIngredient2: "Lemon", strIngredient3: "Garlic", strIngredient4: "Olive Oil",
+    strIngredient5: "Salt", strIngredient6: "Pepper",
+    strMeasure1: "2 cups", strMeasure2: "2", strMeasure3: "4 cloves", strMeasure4: "3 tbsp",
+    strMeasure5: "to taste", strMeasure6: "to taste",
+    strInstructions: "1. Soak fava beans overnight.\n2. Cook until very soft.\n3. Mash slightly.\n4. Add lemon juice, crushed garlic, cumin.\n5. Drizzle olive oil.\n6. Serve with bread, tomato, and tahini."
+  },
+  {
+    idMeal: "fb009", strMeal: "دجاج بالبطاطس (Chicken & Potato)", strCategory: "Chicken", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/uvuyxu1503067369.jpg",
+    strIngredient1: "Chicken", strIngredient2: "Potato", strIngredient3: "Onion", strIngredient4: "Tomato",
+    strIngredient5: "Garlic", strIngredient6: "Lemon", strIngredient7: "Salt", strIngredient8: "Pepper",
+    strMeasure1: "1 kg", strMeasure2: "4", strMeasure3: "2", strMeasure4: "3",
+    strMeasure5: "4 cloves", strMeasure6: "1", strMeasure7: "to taste", strMeasure8: "to taste",
+    strInstructions: "1. Season chicken pieces.\n2. Cut potatoes into cubes.\n3. Fry onion and garlic.\n4. Add tomato paste and water.\n5. Add chicken and potatoes.\n6. Bake at 200°C for 45 min."
+  },
+  {
+    idMeal: "fb010", strMeal: "أومليت (Omelette)", strCategory: "Breakfast", strArea: "British",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/yvpuuy1511797277.jpg",
+    strIngredient1: "Egg", strIngredient2: "Butter", strIngredient3: "Cheese", strIngredient4: "Salt",
+    strIngredient5: "Pepper",
+    strMeasure1: "3", strMeasure2: "20g", strMeasure3: "50g", strMeasure4: "pinch",
+    strMeasure5: "pinch",
+    strInstructions: "1. Beat eggs with salt and pepper.\n2. Melt butter in pan.\n3. Pour eggs and cook gently.\n4. Add cheese when almost set.\n5. Fold and serve."
+  },
+  {
+    idMeal: "fb011", strMeal: "باستا بالصلصة (Pasta with Sauce)", strCategory: "Pasta", strArea: "Italian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/syqypv1486981727.jpg",
+    strIngredient1: "Pasta", strIngredient2: "Tomato", strIngredient3: "Garlic", strIngredient4: "Olive Oil",
+    strIngredient5: "Onion", strIngredient6: "Salt", strIngredient7: "Pepper",
+    strMeasure1: "400g", strMeasure2: "4", strMeasure3: "4 cloves", strMeasure4: "3 tbsp",
+    strMeasure5: "1", strMeasure6: "to taste", strMeasure7: "to taste",
+    strInstructions: "1. Cook pasta al dente.\n2. Sauté garlic and onion in olive oil.\n3. Add crushed tomatoes.\n4. Season and simmer 15 min.\n5. Toss pasta with sauce.\n6. Serve with parmesan."
+  },
+  {
+    idMeal: "fb012", strMeal: "شوربة عدس (Lentil Soup)", strCategory: "Side", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/52oyst1593350318.jpg",
+    strIngredient1: "Lentils", strIngredient2: "Onion", strIngredient3: "Carrot", strIngredient4: "Garlic",
+    strIngredient5: "Lemon", strIngredient6: "Salt", strIngredient7: "Pepper",
+    strMeasure1: "2 cups", strMeasure2: "1", strMeasure3: "2", strMeasure4: "3 cloves",
+    strMeasure5: "1", strMeasure6: "to taste", strMeasure7: "to taste",
+    strInstructions: "1. Wash lentils.\n2. Sauté onion, garlic, and carrot.\n3. Add lentils and water.\n4. Boil then simmer 25 min.\n5. Blend until smooth.\n6. Add lemon juice and serve."
+  },
+  {
+    idMeal: "fb013", strMeal: "سمك مشوي (Grilled Fish)", strCategory: "Seafood", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/1548772327.jpg",
+    strIngredient1: "Fish", strIngredient2: "Lemon", strIngredient3: "Garlic", strIngredient4: "Salt",
+    strIngredient5: "Pepper", strIngredient6: "Olive Oil",
+    strMeasure1: "1 whole", strMeasure2: "2", strMeasure3: "4 cloves", strMeasure4: "to taste",
+    strMeasure5: "to taste", strMeasure6: "2 tbsp",
+    strInstructions: "1. Clean and score fish.\n2. Mix garlic, lemon, spices.\n3. Marinate 30 min.\n4. Grill on medium heat.\n5. Turn once until cooked.\n6. Serve with tahini and salad."
+  },
+  {
+    idMeal: "fb014", strMeal: "أرز بالحليب (Rice Pudding)", strCategory: "Dessert", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/1550442508.jpg",
+    strIngredient1: "Rice", strIngredient2: "Milk", strIngredient3: "Sugar", strIngredient4: "Vanilla",
+    strMeasure1: "1/2 cup", strMeasure2: "4 cups", strMeasure3: "1/2 cup", strMeasure4: "1 tsp",
+    strInstructions: "1. Wash and soak rice.\n2. Boil milk.\n3. Add rice and cook 30 min.\n4. Add sugar and vanilla.\n5. Pour into serving cups.\n6. Chill and serve with cinnamon."
+  },
+  {
+    idMeal: "fb015", strMeal: "سلطة (Fresh Salad)", strCategory: "Side", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/y2xxl21619704803.jpg",
+    strIngredient1: "Tomato", strIngredient2: "Cucumber", strIngredient3: "Onion", strIngredient4: "Lemon",
+    strIngredient5: "Olive Oil", strIngredient6: "Salt", strIngredient7: "Mint",
+    strMeasure1: "3", strMeasure2: "2", strMeasure3: "1", strMeasure4: "1",
+    strMeasure5: "2 tbsp", strMeasure6: "to taste", strMeasure7: "handful",
+    strInstructions: "1. Dice tomato and cucumber.\n2. Slice onion thinly.\n3. Chop fresh mint.\n4. Mix all together.\n5. Dress with lemon, olive oil, salt.\n6. Serve fresh."
+  }
 ];
 
 // ========== CATEGORY MAP ==========
@@ -799,7 +1313,7 @@ const CUISINES = ['Egyptian','French','Italian','Indian','Japanese','Mexican','M
 // ========== i18n ==========
 const i18n = {
   ar: {
-    search_placeholder: 'اكتب مكون واضغط ＋ (مثل: chicken, rice, tomato)...',
+    search_placeholder: 'اكتب مكون بالعربي أو الإنجليزي واضغط ＋ (مثل: دجاج, chicken, طماطم)...',
     search_btn: '\u{1F50D} بحث بالمكونات', clear_btn: 'مسح الكل',
     quick_label: '\u26A1 مكونات سريعة \u2014 اضغط للإضافة',
     filter_cuisine: '\u{1F30D} المطبخ', recipes: 'الوصفات',
@@ -858,6 +1372,7 @@ function t(key) { return (i18n[state.language] || i18n.ar)[key] || key; }
 document.addEventListener('DOMContentLoaded', () => { initApp(); });
 
 function initApp() {
+  initTheme();
   renderQuickIngredients();
   renderCuisineFilters();
   loadInitialRecipes();
@@ -915,6 +1430,7 @@ function setLanguage(lang) {
   state.language = lang;
   applyLanguage();
   renderCuisineFilters();
+  renderQuickIngredients();
   if (state.selectedIngredients.length > 0) searchByIngredients();
   showToast(lang === 'ar' ? 'تم تغيير اللغة' : lang === 'en' ? 'Language changed' : 'Langue modifiée');
 }
@@ -941,18 +1457,22 @@ function filterCategory(cat) {
     else {
       const cats = CATEGORY_MAP[cat] || [];
       if (cats.length > 0) loadByCategory(cats[0]);
+      else loadInitialRecipes();
     }
   }
 }
 
 // ========== INGREDIENT TAGS ==========
 function addIngredient(name) {
-  const normalized = name.trim();
-  if (!normalized || state.selectedIngredients.some(i => i.toLowerCase() === normalized.toLowerCase())) return;
-  state.selectedIngredients.push(normalized);
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  // Translate Arabic to English for API
+  const translated = translateIngredient(trimmed);
+  if (state.selectedIngredients.some(i => i.toLowerCase() === translated.toLowerCase())) return;
+  state.selectedIngredients.push(translated);
   renderIngredientTags();
   updateQuickChipStates();
-  showToast(t('added_ingredient') + ' ' + normalized);
+  showToast(t('added_ingredient') + ' ' + (translated !== trimmed ? `${trimmed} → ${translated}` : translated));
 }
 
 function removeIngredient(name) {
@@ -974,7 +1494,11 @@ function addIngredientFromInput() {
   const input = document.getElementById('searchInput');
   const val = input.value.trim();
   if (!val) return;
-  val.split(',').forEach(v => addIngredient(v.trim()));
+  // Split by comma or Arabic comma or space-separated multiple words
+  val.split(/[,،]+/).forEach(v => {
+    const t = v.trim();
+    if (t) addIngredient(t);
+  });
   input.value = '';
 }
 
@@ -993,8 +1517,9 @@ function renderIngredientTags() {
 function renderQuickIngredients() {
   const container = document.getElementById('quickChips');
   container.innerHTML = QUICK_INGREDIENTS.map(ing => {
-    const selected = state.selectedIngredients.some(i => i.toLowerCase() === ing.toLowerCase());
-    return `<button class="quick-chip ${selected ? 'selected' : ''}" onclick="toggleQuickIngredient('${ing}')">${ing}</button>`;
+    const selected = state.selectedIngredients.some(i => i.toLowerCase() === ing.en.toLowerCase());
+    const label = state.language === 'ar' ? ing.ar : ing.en;
+    return `<button class="quick-chip ${selected ? 'selected' : ''}" onclick="toggleQuickIngredient('${ing.en}')">${label}</button>`;
   }).join('');
 }
 
@@ -1005,8 +1530,11 @@ function toggleQuickIngredient(ing) {
 
 function updateQuickChipStates() {
   document.querySelectorAll('.quick-chip').forEach(chip => {
-    const ing = chip.textContent;
-    const selected = state.selectedIngredients.some(i => i.toLowerCase() === ing.toLowerCase());
+    // Match by onclick attribute to find the English name
+    const match = chip.getAttribute('onclick')?.match(/toggleQuickIngredient\('(.+?)'\)/);
+    if (!match) return;
+    const ingEn = match[1];
+    const selected = state.selectedIngredients.some(i => i.toLowerCase() === ingEn.toLowerCase());
     chip.classList.toggle('selected', selected);
   });
 }
@@ -1043,8 +1571,14 @@ async function loadInitialRecipes() {
   try {
     const data = await apiFetch('/search.php?s=');
     state.meals = data.meals || [];
+    if (state.meals.length === 0) throw new Error('No meals');
     filterAndRenderMeals();
-  } catch (e) { showError(); }
+  } catch (e) {
+    // Use fallback recipes when API fails
+    console.warn('API unavailable, using fallback recipes');
+    state.meals = [...FALLBACK_RECIPES];
+    filterAndRenderMeals();
+  }
 }
 
 async function loadByCategory(category) {
@@ -1052,8 +1586,13 @@ async function loadByCategory(category) {
   try {
     const data = await apiFetch(`/filter.php?c=${encodeURIComponent(category)}`);
     state.meals = data.meals || [];
+    if (state.meals.length === 0) throw new Error('No meals');
     filterAndRenderMeals();
-  } catch (e) { showError(); }
+  } catch (e) {
+    // Fallback: filter embedded recipes by category
+    state.meals = FALLBACK_RECIPES.filter(m => m.strCategory === category);
+    filterAndRenderMeals();
+  }
 }
 
 async function loadByArea(area) {
@@ -1061,8 +1600,13 @@ async function loadByArea(area) {
   try {
     const data = await apiFetch(`/filter.php?a=${encodeURIComponent(area)}`);
     state.meals = data.meals || [];
+    if (state.meals.length === 0) throw new Error('No meals');
     filterAndRenderMeals();
-  } catch (e) { showError(); }
+  } catch (e) {
+    // Fallback: filter embedded recipes by area
+    state.meals = FALLBACK_RECIPES.filter(m => m.strArea === area);
+    filterAndRenderMeals();
+  }
 }
 
 // ========== INGREDIENT SEARCH (CORE) ==========
@@ -1076,7 +1620,23 @@ async function searchByIngredients() {
     );
     const results = await Promise.all(promises);
 
-    if (results.length === 1) {
+    // Check if all API calls returned empty (API might be down)
+    const allEmpty = results.every(r => r.length === 0);
+
+    if (allEmpty) {
+      // Use fallback recipes - filter by ingredients
+      const selectedLower = ingredients.map(i => i.toLowerCase());
+      state.allIngredientMeals = FALLBACK_RECIPES.filter(meal => {
+        const mealIngredients = [];
+        for (let i = 1; i <= 20; i++) {
+          const ing = meal[`strIngredient${i}`];
+          if (ing && ing.trim()) mealIngredients.push(ing.trim().toLowerCase());
+        }
+        return selectedLower.every(sel =>
+          mealIngredients.some(mi => mi.includes(sel) || sel.includes(mi))
+        );
+      });
+    } else if (results.length === 1) {
       state.allIngredientMeals = results[0];
     } else {
       const idSets = results.map(meals => new Set(meals.map(m => m.idMeal)));
@@ -1088,7 +1648,21 @@ async function searchByIngredients() {
     state.meals = [...state.allIngredientMeals];
     filterAndRenderMeals();
     showIngredientSuggestions();
-  } catch (e) { showError(); }
+  } catch (e) {
+    // Final fallback
+    const selectedLower = state.selectedIngredients.map(i => i.toLowerCase());
+    state.meals = FALLBACK_RECIPES.filter(meal => {
+      const mealIngredients = [];
+      for (let i = 1; i <= 20; i++) {
+        const ing = meal[`strIngredient${i}`];
+        if (ing && ing.trim()) mealIngredients.push(ing.trim().toLowerCase());
+      }
+      return selectedLower.every(sel =>
+        mealIngredients.some(mi => mi.includes(sel) || sel.includes(mi))
+      );
+    });
+    filterAndRenderMeals();
+  }
 }
 
 // ========== SUGGESTIONS ==========
@@ -1148,6 +1722,12 @@ function showLoading(msg) {
 
 function showError() {
   state.isLoading = false;
+  // Try fallback recipes instead of just showing error
+  if (state.meals.length === 0 && FALLBACK_RECIPES.length > 0) {
+    state.meals = [...FALLBACK_RECIPES];
+    renderRecipes();
+    return;
+  }
   document.getElementById('recipesContainer').innerHTML =
     `<div class="error-state"><p>${t('error_desc')}</p><button class="retry-btn" onclick="loadInitialRecipes()">${t('retry')}</button></div>`;
 }
@@ -1193,9 +1773,17 @@ function renderRecipeCards(meals) {
 // ========== LOAD RECIPE ==========
 async function loadRecipeById(id) {
   try {
+    // Check if it's a fallback recipe first
+    const fallback = FALLBACK_RECIPES.find(m => m.idMeal === id);
+    if (fallback) { openRecipeModal(fallback); return; }
     const data = await apiFetch(`/lookup.php?i=${id}`);
     if (data.meals && data.meals[0]) openRecipeModal(data.meals[0]);
-  } catch (e) { showToast(t('error')); }
+  } catch (e) {
+    // Try fallback
+    const fallback = FALLBACK_RECIPES.find(m => m.idMeal === id);
+    if (fallback) openRecipeModal(fallback);
+    else showToast(t('error'));
+  }
 }
 
 async function loadRandomRecipe() {
@@ -1204,9 +1792,11 @@ async function loadRandomRecipe() {
   try {
     const data = await apiFetch('/random.php');
     if (data.meals && data.meals[0]) container.innerHTML = renderRecipeCards(data.meals);
-    else container.innerHTML = `<div class="empty-state"><div class="empty-icon">\u{1F3B2}</div><div class="empty-title">${t('no_results')}</div></div>`;
+    else throw new Error('No meals');
   } catch (e) {
-    container.innerHTML = `<div class="error-state"><p>${t('error')}</p><button class="retry-btn" onclick="loadRandomRecipe()">${t('retry')}</button></div>`;
+    // Fallback: pick a random recipe from embedded data
+    const random = FALLBACK_RECIPES[Math.floor(Math.random() * FALLBACK_RECIPES.length)];
+    container.innerHTML = renderRecipeCards([random]);
   }
 }
 
@@ -1304,6 +1894,56 @@ function showSettings() { document.getElementById('settingsOverlay').classList.a
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('active'); document.getElementById('settingsPanel').classList.remove('active'); }
 function clearCache() { if ('caches' in window) caches.keys().then(names => names.forEach(n => caches.delete(n))); showToast(t('cached_cleared')); }
 function rateApp() { showToast(t('rate_msg')); }
+
+// ========== DARK/LIGHT MODE ==========
+function initTheme() {
+  const saved = localStorage.getItem('setelkol_theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+  } else {
+    // Auto-detect system preference
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  updateThemeIcon();
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  if (next === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  localStorage.setItem('setelkol_theme', next);
+  updateThemeIcon();
+  showToast(next === 'dark' ? '🌙 الوضع الليلي' : '☀️ الوضع النهاري');
+}
+
+function updateThemeIcon() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  btn.textContent = isDark ? '☀️' : '🌙';
+  btn.title = isDark ? 'تبديل للوضع النهاري' : 'تبديل للوضع الليلي';
+}
+
+// ========== INFO PAGES ==========
+function openInfoPage(page) {
+  closeSettings();
+  setTimeout(() => {
+    document.getElementById(page + 'Overlay').classList.add('active');
+    document.getElementById(page + 'Page').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }, 200);
+}
+
+function closeInfoPage(page) {
+  document.getElementById(page + 'Overlay').classList.remove('active');
+  document.getElementById(page + 'Page').classList.remove('active');
+  document.body.style.overflow = '';
+}
 function showPrivacyPolicy() { showToast('سياسة الخصوصية — Privacy Policy'); }
 function showTerms() { showToast('شروط الاستخدام — Terms of Service'); }
 
