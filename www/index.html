@@ -1137,7 +1137,20 @@ const INGREDIENT_MAP_AR = {
   'ماء ورد': 'Rose Water', 'ماء زهر': 'Orange Blossom Water',
   'بط': 'Duck', 'ديك رومي': 'Turkey', 'تركي': 'Turkey',
   'سجق': 'Sausage', 'نقانق': 'Sausage', 'سلامي': 'Salami', 'بيكون': 'Bacon',
-  'شرائح اللحم': 'Beef', 'مينس': 'Mince'
+  'شرائح اللحم': 'Beef', 'مينس': 'Mince',
+  'شعرية': 'Vermicelli', 'شَعرية': 'Vermicelli', 'شعريه': 'Vermicelli',
+  'مكرونة اسباجتي': 'Spaghetti', 'اسباجتي': 'Spaghetti',
+  'صلصة طماطم': 'Tomato', 'معجون طماطم': 'Tomato Puree',
+  'حليب جوز الهند': 'Coconut Milk',
+  'مرق': 'Stock', 'شوربة': 'Stock', 'مرقة': 'Stock',
+  'خل': 'Vinegar', 'توابل': 'Spices', 'بابريكا': 'Paprika',
+  'زعتر': 'Thyme', 'يانسون': 'Anise', 'شمر': 'Fennel',
+  'سمسم': 'Sesame', 'طحينة': 'Tahini', 'طحينه': 'Tahini',
+  'كراث': 'Leeks', 'فجل': 'Radish',
+  'برتقال': 'Orange', 'تفاح': 'Apple', 'موز': 'Banana',
+  'فراولة': 'Strawberry', 'مانجو': 'Mango',
+  'رقاق': 'Pastry', 'عجينة': 'Dough', 'فريكة': 'Freekeh',
+  'برغل': 'Bulgur'
 };
 
 // Translate Arabic ingredient to English
@@ -2489,9 +2502,14 @@ function renderCuisineFilters() {
 function filterCuisine(cuisine) {
   state.activeCuisine = cuisine;
   renderCuisineFilters();
-  if (state.selectedIngredients.length > 0) searchByIngredients();
-  else if (cuisine) loadByArea(cuisine);
-  else loadInitialRecipes();
+  if (state.selectedIngredients.length > 0) {
+    // Re-search with both ingredients AND area filter
+    searchByIngredients();
+  } else if (cuisine) {
+    loadByArea(cuisine);
+  } else {
+    loadInitialRecipes();
+  }
 }
 
 // ========== API ==========
@@ -2538,9 +2556,66 @@ async function loadByCategory(category) {
 
 async function loadByArea(area) {
   showLoading();
-  // LOCAL FIRST
-  state.meals = FALLBACK_RECIPES.filter(m => m.strArea === area);
+  // LOCAL FIRST — filter by area and optionally by selected ingredients
+  let meals = FALLBACK_RECIPES.filter(m => m.strArea === area);
+  if (state.selectedIngredients.length > 0) {
+    const selectedLower = state.selectedIngredients.map(i => i.toLowerCase());
+    meals = meals.filter(meal => {
+      const mealIngredients = [];
+      for (let i = 1; i <= 20; i++) {
+        const ing = meal[`strIngredient${i}`];
+        if (ing && ing.trim()) mealIngredients.push(ing.trim().toLowerCase());
+      }
+      return selectedLower.every(sel =>
+        mealIngredients.some(mi => mi.includes(sel) || sel.includes(mi))
+      );
+    });
+  }
+  state.meals = meals;
   filterAndRenderMeals();
+  // Background: try API for more results
+  try {
+    const data = await apiFetch(`/filter.php?a=${encodeURIComponent(area)}`);
+    if (data.meals && data.meals.length > 0) {
+      const localIds = new Set(state.meals.map(m => m.idMeal));
+      let newMeals = data.meals.filter(m => !localIds.has(m.idMeal));
+      // If ingredients selected, filter API results too
+      if (state.selectedIngredients.length > 0) {
+        // Fetch details for a batch and filter
+        const batch = newMeals.slice(0, 20);
+        const details = await Promise.all(batch.map(m =>
+          apiFetch(`/lookup.php?i=${m.idMeal}`).then(d => (d.meals && d.meals[0]) || null).catch(() => null)
+        ));
+        const selectedLower = state.selectedIngredients.map(i => i.toLowerCase());
+        details.forEach(meal => {
+          if (!meal) return;
+          const mealIngredients = [];
+          for (let i = 1; i <= 20; i++) {
+            const ing = meal[`strIngredient${i}`];
+            if (ing && ing.trim()) mealIngredients.push(ing.trim().toLowerCase());
+          }
+          const match = selectedLower.every(sel =>
+            mealIngredients.some(mi => mi.includes(sel) || sel.includes(mi))
+          );
+          if (match && !state.meals.some(x => x.idMeal === meal.idMeal)) {
+            state.meals.push(meal);
+          }
+        });
+      } else {
+        // No ingredients — just add area meals (need details for display)
+        const batch = newMeals.slice(0, 10);
+        const details = await Promise.all(batch.map(m =>
+          apiFetch(`/lookup.php?i=${m.idMeal}`).then(d => (d.meals && d.meals[0]) || null).catch(() => null)
+        ));
+        details.forEach(meal => {
+          if (meal && !state.meals.some(x => x.idMeal === meal.idMeal)) {
+            state.meals.push(meal);
+          }
+        });
+      }
+      filterAndRenderMeals();
+    }
+  } catch (e) { /* API failed, local results already shown */ }
 }
 
 // ========== INGREDIENT SEARCH (LOCAL FIRST!) ==========
@@ -2566,19 +2641,25 @@ async function searchByIngredients() {
   });
 
   const localResults = FALLBACK_RECIPES.filter(meal => {
+    // Build meal ingredient list
     const mealIngredients = [];
     for (let i = 1; i <= 20; i++) {
       const ing = meal[`strIngredient${i}`];
       if (ing && ing.trim()) mealIngredients.push(ing.trim().toLowerCase());
     }
-    // Match if ALL selected ingredients are found in the meal
+    // Match ONLY if ALL selected ingredients are found (AND logic, not OR)
     const ingredientMatch = selectedLower.every(sel =>
-      mealIngredients.some(mi => mi.includes(sel) || sel.includes(mi))
+      mealIngredients.some(mi => {
+        const miNorm = mi.replace(/[^a-z0-9]/g, '');
+        const selNorm = sel.replace(/[^a-z0-9]/g, '');
+        return miNorm.includes(selNorm) || selNorm.includes(miNorm)
+          || mi.includes(sel) || sel.includes(mi);
+      })
     );
-    // Also match by recipe name
-    const nameMatch = selectedLower.some(sel => meal.strMeal.toLowerCase().includes(sel))
-      || selectedArabic.some(sel => meal.strMeal.toLowerCase().includes(sel));
-    return ingredientMatch || nameMatch;
+    if (!ingredientMatch) return false;
+    // Also filter by selected cuisine/area if active
+    if (state.activeCuisine && meal.strArea !== state.activeCuisine) return false;
+    return true;
   });
 
   state.allIngredientMeals = localResults;
@@ -2594,12 +2675,15 @@ async function searchByIngredients() {
     const results = await Promise.all(promises);
     const apiEmpty = results.every(r => r.length === 0);
     if (!apiEmpty) {
-      // Get API meal IDs, filter out ones we already have
+      // Get API meal IDs — handle when some ingredients return 0 results
       let apiIds;
-      if (results.length === 1) {
-        apiIds = results[0].map(m => m.idMeal);
+      const nonEmpty = results.filter(r => r.length > 0);
+      if (nonEmpty.length === 0) {
+        apiIds = [];
+      } else if (nonEmpty.length === 1) {
+        apiIds = nonEmpty[0].map(m => m.idMeal);
       } else {
-        const idSets = results.map(meals => new Set(meals.map(m => m.idMeal)));
+        const idSets = nonEmpty.map(meals => new Set(meals.map(m => m.idMeal)));
         apiIds = [...idSets[0]].filter(id => idSets.every(s => s.has(id)));
       }
       const localIds = new Set(localResults.map(m => m.idMeal));
@@ -2613,6 +2697,8 @@ async function searchByIngredients() {
           ));
           detailResults.forEach(m => {
             if (m && !state.meals.some(x => x.idMeal === m.idMeal)) {
+              // Filter API results by selected cuisine/area
+              if (state.activeCuisine && m.strArea !== state.activeCuisine) return;
               state.meals.push(m);
             }
           });
@@ -2661,14 +2747,11 @@ function filterAndRenderMeals() {
     const allowedCats = CATEGORY_MAP[state.activeCategory] || [];
     if (allowedCats.length > 0) {
       const filtered = meals.filter(m => allowedCats.includes(m.strCategory));
-      // FIX: Don't zero out results if filter removes everything
-      if (filtered.length > 0 || meals.length === 0) meals = filtered;
+      meals = filtered;
     }
   }
   if (state.activeCuisine) {
-    const filtered = meals.filter(m => m.strArea === state.activeCuisine);
-    // FIX: Don't zero out results if filter removes everything
-    if (filtered.length > 0 || meals.length === 0) meals = filtered;
+    meals = meals.filter(m => m.strArea === state.activeCuisine);
   }
   state.meals = meals;
   renderRecipes();
@@ -2704,11 +2787,20 @@ function renderRecipes() {
   document.getElementById('resultsCount').textContent = `${state.meals.length}`;
 
   if (state.meals.length === 0) {
-    if (state.selectedIngredients.length > 0) {
-      container.innerHTML = `<div class="empty-state"><div class="empty-icon">\u{1F373}</div><div class="empty-title">${t('no_results_ingredient')}</div><div class="empty-desc">${t('no_results_ingredient_desc')}</div></div>`;
+    const hasIngredients = state.selectedIngredients.length > 0;
+    const hasCuisine = !!state.activeCuisine;
+    let emptyTitle, emptyDesc;
+    if (hasIngredients && hasCuisine) {
+      emptyTitle = state.language === 'ar' ? `لا توجد وصفات ${state.activeCuisine} بهذه المكونات` : `No ${state.activeCuisine} recipes with these ingredients`;
+      emptyDesc = state.language === 'ar' ? 'جرّب تغيير المطبخ أو المكونات' : 'Try changing the cuisine or ingredients';
+    } else if (hasIngredients) {
+      emptyTitle = t('no_results_ingredient');
+      emptyDesc = t('no_results_ingredient_desc');
     } else {
-      container.innerHTML = `<div class="empty-state"><div class="empty-icon">\u{1F50D}</div><div class="empty-title">${t('no_results')}</div><div class="empty-desc">${t('no_results_desc')}</div></div>`;
+      emptyTitle = t('no_results');
+      emptyDesc = t('no_results_desc');
     }
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">${hasIngredients ? '\u{1F373}' : '\u{1F50D}'}</div><div class="empty-title">${emptyTitle}</div><div class="empty-desc">${emptyDesc}</div></div>`;
     return;
   }
   container.innerHTML = renderRecipeCards(state.meals);
