@@ -618,7 +618,7 @@
     <div class="search-section">
       <div class="search-row">
         <span class="search-icon">🥘</span>
-        <input type="text" id="searchInput" placeholder="اكتب مكون واضغط ＋ (مثل: chicken, rice, tomato)..."
+        <input type="text" id="searchInput" placeholder="اكتب مكون بالعربي أو الإنجليزي واضغط ＋ (مثل: دجاج, chicken, طماطم)..."
                onkeydown="if(event.key==='Enter') addIngredientFromInput()">
         <button class="add-ingredient-btn" onclick="addIngredientFromInput()" title="إضافة مكون">＋</button>
       </div>
@@ -777,12 +777,208 @@ const state = {
 // ========== API ==========
 const API_BASE = 'https://www.themealdb.com/api/json/v1/1';
 
-// ========== QUICK INGREDIENTS ==========
+// ========== ARABIC → ENGLISH INGREDIENT MAP ==========
+const INGREDIENT_MAP_AR = {
+  'دجاج': 'Chicken', 'فراخ': 'Chicken', 'لحمة': 'Beef', 'لحم': 'Beef', 'بانيه': 'Chicken',
+  'بيض': 'Egg', 'أرز': 'Rice', 'رز': 'Rice', 'معكرونة': 'Pasta', 'باستا': 'Pasta',
+  'طماطم': 'Tomato', 'بندورة': 'Tomato', 'بصل': 'Onion', 'ثوم': 'Garlic',
+  'بطاطس': 'Potato', 'بطاطا': 'Potato', 'جبنة': 'Cheese', 'جبن': 'Cheese',
+  'حليب': 'Milk', 'زبدة': 'Butter', 'دقيق': 'Flour', 'سكر': 'Sugar',
+  'ليمون': 'Lemon', 'زيت زيتون': 'Olive Oil', 'زيت': 'Olive Oil',
+  'فلفل': 'Pepper', 'ملح': 'Salt', 'جزر': 'Carrot', 'فطر': 'Mushroom',
+  'سمك': 'Fish', 'جمبري': 'Shrimp', 'روبيان': 'Shrimp', 'سجق': 'Sausage',
+  'سبانخ': 'Spinach', 'بروكلي': 'Broccoli', 'أفوكادو': 'Avocado',
+  'زنجبيل': 'Ginger', 'جوز الهند': 'Coconut', 'عسل': 'Honey',
+  'كسكس': 'Couscous', 'كشري': 'Rice', 'ملوخية': 'Molokhia',
+  'فول': 'Beans', 'عدس': 'Lentils', 'حمص': 'Chickpea',
+  'خس': 'Lettuce', 'خيار': 'Cucumber', 'كوسة': 'Zucchini',
+  'باذنجان': 'Eggplant', 'فلفل أخضر': 'Green Pepper',
+  'كرفس': 'Celery', 'زنجبيل': 'Ginger', 'نعناع': 'Mint',
+  'كزبرة': 'Coriander', 'بقدونس': 'Parsley', 'شبت': 'Dill',
+  'أعشاب': 'Herbs', 'بهارات': 'Spices', 'كمون': 'Cumin',
+  'كركم': 'Turmeric', 'قرفة': 'Cinnamon', 'هيل': 'Cardamom',
+  'جوزة الطيب': 'Nutmeg', 'زعفران': 'Saffron',
+  'مكسرات': 'Nuts', 'لوز': 'Almonds', 'جوز': 'Walnuts',
+  'فستق': 'Pistachio', 'كاجو': 'Cashew', 'تمر': 'Dates',
+  'زبيب': 'Raisins', 'شوكولاتة': 'Chocolate', 'كاكاو': 'Cocoa',
+  'قشطة': 'Cream', 'كريمة': 'Cream', 'نشا': 'Starch',
+  'خميرة': 'Yeast', 'فانيليا': 'Vanilla', 'ماء ورد': 'Rose Water',
+  'ماء زهر': 'Orange Blossom Water'
+};
+
+// Translate Arabic ingredient to English
+function translateIngredient(input) {
+  const trimmed = input.trim();
+  // Check exact match first
+  if (INGREDIENT_MAP_AR[trimmed]) return INGREDIENT_MAP_AR[trimmed];
+  // Check case-insensitive
+  const lower = trimmed.toLowerCase();
+  for (const [ar, en] of Object.entries(INGREDIENT_MAP_AR)) {
+    if (ar.toLowerCase() === lower) return en;
+  }
+  // Return as-is (assume English)
+  return trimmed;
+}
+
+// ========== QUICK INGREDIENTS (bilingual) ==========
 const QUICK_INGREDIENTS = [
-  'Chicken','Beef','Egg','Rice','Pasta','Tomato','Onion','Garlic',
-  'Potato','Cheese','Milk','Butter','Flour','Sugar','Lemon','Olive Oil',
-  'Pepper','Salt','Carrot','Mushroom','Fish','Shrimp','Bacon','Sausage',
-  'Spinach','Broccoli','Avocado','Ginger','Coconut','Honey'
+  { en: 'Chicken', ar: 'دجاج 🍗' },
+  { en: 'Beef', ar: 'لحمة 🥩' },
+  { en: 'Egg', ar: 'بيض 🥚' },
+  { en: 'Rice', ar: 'أرز 🍚' },
+  { en: 'Pasta', ar: 'معكرونة 🍝' },
+  { en: 'Tomato', ar: 'طماطم 🍅' },
+  { en: 'Onion', ar: 'بصل 🧅' },
+  { en: 'Garlic', ar: 'ثوم 🧄' },
+  { en: 'Potato', ar: 'بطاطس 🥔' },
+  { en: 'Cheese', ar: 'جبنة 🧀' },
+  { en: 'Butter', ar: 'زبدة 🧈' },
+  { en: 'Lemon', ar: 'ليمون 🍋' },
+  { en: 'Fish', ar: 'سمك 🐟' },
+  { en: 'Shrimp', ar: 'جمبري 🦐' },
+  { en: 'Mushroom', ar: 'فطر 🍄' },
+  { en: 'Carrot', ar: 'جزر 🥕' },
+  { en: 'Spinach', ar: 'سبانخ 🥬' },
+  { en: 'Coconut', ar: 'جوز الهند 🥥' },
+  { en: 'Honey', ar: 'عسل 🍯' },
+  { en: 'Chocolate', ar: 'شوكولاتة 🍫' },
+];
+
+// ========== EMBEDDED FALLBACK RECIPES ==========
+const FALLBACK_RECIPES = [
+  {
+    idMeal: "fb001", strMeal: " كبسة دجاج (Kabsa Chicken)", strCategory: "Chicken", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/g07w8f1699013089.jpg",
+    strIngredient1: "Chicken", strIngredient2: "Rice", strIngredient3: "Onion", strIngredient4: "Tomato",
+    strIngredient5: "Garlic", strIngredient6: "Lemon", strIngredient7: "Pepper", strIngredient8: "Salt",
+    strMeasure1: "1 kg", strMeasure2: "3 cups", strMeasure3: "2", strMeasure4: "3",
+    strMeasure5: "4 cloves", strMeasure6: "1", strMeasure7: "1 tsp", strMeasure8: "to taste",
+    strInstructions: "1. Season chicken with spices.\n2. Fry onion and garlic.\n3. Add tomato and cook.\n4. Add chicken and water.\n5. Cook rice separately.\n6. Serve chicken over rice."
+  },
+  {
+    idMeal: "fb002", strMeal: "شاورما دجاج (Chicken Shawarma)", strCategory: "Chicken", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/k420tj1585565244.jpg",
+    strIngredient1: "Chicken", strIngredient2: "Onion", strIngredient3: "Lemon", strIngredient4: "Garlic",
+    strIngredient5: "Pepper", strIngredient6: "Salt", strIngredient7: "Olive Oil",
+    strMeasure1: "500g", strMeasure2: "1", strMeasure3: "1", strMeasure4: "3 cloves",
+    strMeasure5: "1 tsp", strMeasure6: "to taste", strMeasure7: "2 tbsp",
+    strInstructions: "1. Marinate chicken with lemon, garlic, and spices for 2 hours.\n2. Grill or pan-fry until cooked.\n3. Slice thinly.\n4. Serve in bread with garlic sauce and pickles."
+  },
+  {
+    idMeal: "fb003", strMeal: "ملوخية (Molokhia)", strCategory: "Side", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/58oia61564916529.jpg",
+    strIngredient1: "Chicken", strIngredient2: "Garlic", strIngredient3: "Onion", strIngredient4: "Lemon",
+    strIngredient5: "Salt", strIngredient6: "Pepper",
+    strMeasure1: "stock", strMeasure2: "6 cloves", strMeasure3: "1", strMeasure4: "1",
+    strMeasure5: "to taste", strMeasure6: "to taste",
+    strInstructions: "1. Prepare chicken stock.\n2. Chop molokhia leaves finely.\n3. Fry garlic in ghee.\n4. Add stock and bring to boil.\n5. Add molokhia and cook 5 min.\n6. Serve with rice and lemon."
+  },
+  {
+    idMeal: "fb004", strMeal: "بيتزا margherita (Pizza Margherita)", strCategory: "Miscellaneous", strArea: "Italian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/x0lk931587671540.jpg",
+    strIngredient1: "Flour", strIngredient2: "Tomato", strIngredient3: "Cheese", strIngredient4: "Olive Oil",
+    strIngredient5: "Garlic", strIngredient6: "Salt",
+    strMeasure1: "300g", strMeasure2: "4", strMeasure3: "200g", strMeasure4: "2 tbsp",
+    strMeasure5: "2 cloves", strMeasure6: "to taste",
+    strInstructions: "1. Make dough with flour, water, yeast.\n2. Let rise 1 hour.\n3. Spread tomato sauce.\n4. Add mozzarella cheese.\n5. Bake at 220°C for 12-15 min.\n6. Drizzle olive oil and serve."
+  },
+  {
+    idMeal: "fb005", strMeal: "شكشوكة (Shakshuka)", strCategory: "Breakfast", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/g373701551450225.jpg",
+    strIngredient1: "Egg", strIngredient2: "Tomato", strIngredient3: "Onion", strIngredient4: "Garlic",
+    strIngredient5: "Pepper", strIngredient6: "Salt", strIngredient7: "Olive Oil",
+    strMeasure1: "4", strMeasure2: "4", strMeasure3: "1", strMeasure4: "3 cloves",
+    strMeasure5: "1 tsp", strMeasure6: "to taste", strMeasure7: "2 tbsp",
+    strInstructions: "1. Fry onion and garlic in olive oil.\n2. Add chopped tomatoes and cook 10 min.\n3. Season with salt, pepper, cumin.\n4. Make wells and crack eggs.\n5. Cover and cook until eggs set.\n6. Serve with bread."
+  },
+  {
+    idMeal: "fb006", strMeal: "بسبوسة (Basbousa)", strCategory: "Dessert", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/y1wpw11511641833.jpg",
+    strIngredient1: "Flour", strIngredient2: "Sugar", strIngredient3: "Butter", strIngredient4: "Egg",
+    strIngredient5: "Coconut", strIngredient6: "Milk",
+    strMeasure1: "2 cups", strMeasure2: "1 cup", strMeasure3: "100g", strMeasure4: "2",
+    strMeasure5: "1/2 cup", strMeasure6: "1 cup",
+    strInstructions: "1. Mix semolina, coconut, sugar.\n2. Add melted butter and eggs.\n3. Add milk and mix well.\n4. Pour into greased pan.\n5. Bake at 180°C for 30 min.\n6. Pour sugar syrup on top. Cut and serve."
+  },
+  {
+    idMeal: "fb007", strMeal: "كنافة (Kunafa)", strCategory: "Dessert", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/n32d7e1598112774.jpg",
+    strIngredient1: "Flour", strIngredient2: "Butter", strIngredient3: "Cheese", strIngredient4: "Sugar",
+    strIngredient5: "Milk",
+    strMeasure1: "500g shredded", strMeasure2: "200g", strMeasure3: "300g", strMeasure4: "2 cups",
+    strMeasure5: "1 cup",
+    strInstructions: "1. Mix shredded dough with melted butter.\n2. Press half into pan.\n3. Add cheese layer.\n4. Top with remaining dough.\n5. Bake until golden.\n6. Pour syrup and add pistachios."
+  },
+  {
+    idMeal: "fb008", strMeal: "فول مدمس (Ful Medames)", strCategory: "Breakfast", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/qrttys1511813187.jpg",
+    strIngredient1: "Beans", strIngredient2: "Lemon", strIngredient3: "Garlic", strIngredient4: "Olive Oil",
+    strIngredient5: "Salt", strIngredient6: "Pepper",
+    strMeasure1: "2 cups", strMeasure2: "2", strMeasure3: "4 cloves", strMeasure4: "3 tbsp",
+    strMeasure5: "to taste", strMeasure6: "to taste",
+    strInstructions: "1. Soak fava beans overnight.\n2. Cook until very soft.\n3. Mash slightly.\n4. Add lemon juice, crushed garlic, cumin.\n5. Drizzle olive oil.\n6. Serve with bread, tomato, and tahini."
+  },
+  {
+    idMeal: "fb009", strMeal: "دجاج بالبطاطس (Chicken & Potato)", strCategory: "Chicken", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/uvuyxu1503067369.jpg",
+    strIngredient1: "Chicken", strIngredient2: "Potato", strIngredient3: "Onion", strIngredient4: "Tomato",
+    strIngredient5: "Garlic", strIngredient6: "Lemon", strIngredient7: "Salt", strIngredient8: "Pepper",
+    strMeasure1: "1 kg", strMeasure2: "4", strMeasure3: "2", strMeasure4: "3",
+    strMeasure5: "4 cloves", strMeasure6: "1", strMeasure7: "to taste", strMeasure8: "to taste",
+    strInstructions: "1. Season chicken pieces.\n2. Cut potatoes into cubes.\n3. Fry onion and garlic.\n4. Add tomato paste and water.\n5. Add chicken and potatoes.\n6. Bake at 200°C for 45 min."
+  },
+  {
+    idMeal: "fb010", strMeal: "أومليت (Omelette)", strCategory: "Breakfast", strArea: "British",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/yvpuuy1511797277.jpg",
+    strIngredient1: "Egg", strIngredient2: "Butter", strIngredient3: "Cheese", strIngredient4: "Salt",
+    strIngredient5: "Pepper",
+    strMeasure1: "3", strMeasure2: "20g", strMeasure3: "50g", strMeasure4: "pinch",
+    strMeasure5: "pinch",
+    strInstructions: "1. Beat eggs with salt and pepper.\n2. Melt butter in pan.\n3. Pour eggs and cook gently.\n4. Add cheese when almost set.\n5. Fold and serve."
+  },
+  {
+    idMeal: "fb011", strMeal: "باستا بالصلصة (Pasta with Sauce)", strCategory: "Pasta", strArea: "Italian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/syqypv1486981727.jpg",
+    strIngredient1: "Pasta", strIngredient2: "Tomato", strIngredient3: "Garlic", strIngredient4: "Olive Oil",
+    strIngredient5: "Onion", strIngredient6: "Salt", strIngredient7: "Pepper",
+    strMeasure1: "400g", strMeasure2: "4", strMeasure3: "4 cloves", strMeasure4: "3 tbsp",
+    strMeasure5: "1", strMeasure6: "to taste", strMeasure7: "to taste",
+    strInstructions: "1. Cook pasta al dente.\n2. Sauté garlic and onion in olive oil.\n3. Add crushed tomatoes.\n4. Season and simmer 15 min.\n5. Toss pasta with sauce.\n6. Serve with parmesan."
+  },
+  {
+    idMeal: "fb012", strMeal: "شوربة عدس (Lentil Soup)", strCategory: "Side", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/52oyst1593350318.jpg",
+    strIngredient1: "Lentils", strIngredient2: "Onion", strIngredient3: "Carrot", strIngredient4: "Garlic",
+    strIngredient5: "Lemon", strIngredient6: "Salt", strIngredient7: "Pepper",
+    strMeasure1: "2 cups", strMeasure2: "1", strMeasure3: "2", strMeasure4: "3 cloves",
+    strMeasure5: "1", strMeasure6: "to taste", strMeasure7: "to taste",
+    strInstructions: "1. Wash lentils.\n2. Sauté onion, garlic, and carrot.\n3. Add lentils and water.\n4. Boil then simmer 25 min.\n5. Blend until smooth.\n6. Add lemon juice and serve."
+  },
+  {
+    idMeal: "fb013", strMeal: "سمك مشوي (Grilled Fish)", strCategory: "Seafood", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/1548772327.jpg",
+    strIngredient1: "Fish", strIngredient2: "Lemon", strIngredient3: "Garlic", strIngredient4: "Salt",
+    strIngredient5: "Pepper", strIngredient6: "Olive Oil",
+    strMeasure1: "1 whole", strMeasure2: "2", strMeasure3: "4 cloves", strMeasure4: "to taste",
+    strMeasure5: "to taste", strMeasure6: "2 tbsp",
+    strInstructions: "1. Clean and score fish.\n2. Mix garlic, lemon, spices.\n3. Marinate 30 min.\n4. Grill on medium heat.\n5. Turn once until cooked.\n6. Serve with tahini and salad."
+  },
+  {
+    idMeal: "fb014", strMeal: "أرز بالحليب (Rice Pudding)", strCategory: "Dessert", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/1550442508.jpg",
+    strIngredient1: "Rice", strIngredient2: "Milk", strIngredient3: "Sugar", strIngredient4: "Vanilla",
+    strMeasure1: "1/2 cup", strMeasure2: "4 cups", strMeasure3: "1/2 cup", strMeasure4: "1 tsp",
+    strInstructions: "1. Wash and soak rice.\n2. Boil milk.\n3. Add rice and cook 30 min.\n4. Add sugar and vanilla.\n5. Pour into serving cups.\n6. Chill and serve with cinnamon."
+  },
+  {
+    idMeal: "fb015", strMeal: "سلطة (Fresh Salad)", strCategory: "Side", strArea: "Egyptian",
+    strMealThumb: "https://www.themealdb.com/images/media/meals/y2xxl21619704803.jpg",
+    strIngredient1: "Tomato", strIngredient2: "Cucumber", strIngredient3: "Onion", strIngredient4: "Lemon",
+    strIngredient5: "Olive Oil", strIngredient6: "Salt", strIngredient7: "Mint",
+    strMeasure1: "3", strMeasure2: "2", strMeasure3: "1", strMeasure4: "1",
+    strMeasure5: "2 tbsp", strMeasure6: "to taste", strMeasure7: "handful",
+    strInstructions: "1. Dice tomato and cucumber.\n2. Slice onion thinly.\n3. Chop fresh mint.\n4. Mix all together.\n5. Dress with lemon, olive oil, salt.\n6. Serve fresh."
+  }
 ];
 
 // ========== CATEGORY MAP ==========
@@ -799,7 +995,7 @@ const CUISINES = ['Egyptian','French','Italian','Indian','Japanese','Mexican','M
 // ========== i18n ==========
 const i18n = {
   ar: {
-    search_placeholder: 'اكتب مكون واضغط ＋ (مثل: chicken, rice, tomato)...',
+    search_placeholder: 'اكتب مكون بالعربي أو الإنجليزي واضغط ＋ (مثل: دجاج, chicken, طماطم)...',
     search_btn: '\u{1F50D} بحث بالمكونات', clear_btn: 'مسح الكل',
     quick_label: '\u26A1 مكونات سريعة \u2014 اضغط للإضافة',
     filter_cuisine: '\u{1F30D} المطبخ', recipes: 'الوصفات',
@@ -915,6 +1111,7 @@ function setLanguage(lang) {
   state.language = lang;
   applyLanguage();
   renderCuisineFilters();
+  renderQuickIngredients();
   if (state.selectedIngredients.length > 0) searchByIngredients();
   showToast(lang === 'ar' ? 'تم تغيير اللغة' : lang === 'en' ? 'Language changed' : 'Langue modifiée');
 }
@@ -941,18 +1138,22 @@ function filterCategory(cat) {
     else {
       const cats = CATEGORY_MAP[cat] || [];
       if (cats.length > 0) loadByCategory(cats[0]);
+      else loadInitialRecipes();
     }
   }
 }
 
 // ========== INGREDIENT TAGS ==========
 function addIngredient(name) {
-  const normalized = name.trim();
-  if (!normalized || state.selectedIngredients.some(i => i.toLowerCase() === normalized.toLowerCase())) return;
-  state.selectedIngredients.push(normalized);
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  // Translate Arabic to English for API
+  const translated = translateIngredient(trimmed);
+  if (state.selectedIngredients.some(i => i.toLowerCase() === translated.toLowerCase())) return;
+  state.selectedIngredients.push(translated);
   renderIngredientTags();
   updateQuickChipStates();
-  showToast(t('added_ingredient') + ' ' + normalized);
+  showToast(t('added_ingredient') + ' ' + (translated !== trimmed ? `${trimmed} → ${translated}` : translated));
 }
 
 function removeIngredient(name) {
@@ -974,7 +1175,11 @@ function addIngredientFromInput() {
   const input = document.getElementById('searchInput');
   const val = input.value.trim();
   if (!val) return;
-  val.split(',').forEach(v => addIngredient(v.trim()));
+  // Split by comma or Arabic comma or space-separated multiple words
+  val.split(/[,،]+/).forEach(v => {
+    const t = v.trim();
+    if (t) addIngredient(t);
+  });
   input.value = '';
 }
 
@@ -993,8 +1198,9 @@ function renderIngredientTags() {
 function renderQuickIngredients() {
   const container = document.getElementById('quickChips');
   container.innerHTML = QUICK_INGREDIENTS.map(ing => {
-    const selected = state.selectedIngredients.some(i => i.toLowerCase() === ing.toLowerCase());
-    return `<button class="quick-chip ${selected ? 'selected' : ''}" onclick="toggleQuickIngredient('${ing}')">${ing}</button>`;
+    const selected = state.selectedIngredients.some(i => i.toLowerCase() === ing.en.toLowerCase());
+    const label = state.language === 'ar' ? ing.ar : ing.en;
+    return `<button class="quick-chip ${selected ? 'selected' : ''}" onclick="toggleQuickIngredient('${ing.en}')">${label}</button>`;
   }).join('');
 }
 
@@ -1005,8 +1211,11 @@ function toggleQuickIngredient(ing) {
 
 function updateQuickChipStates() {
   document.querySelectorAll('.quick-chip').forEach(chip => {
-    const ing = chip.textContent;
-    const selected = state.selectedIngredients.some(i => i.toLowerCase() === ing.toLowerCase());
+    // Match by onclick attribute to find the English name
+    const match = chip.getAttribute('onclick')?.match(/toggleQuickIngredient\('(.+?)'\)/);
+    if (!match) return;
+    const ingEn = match[1];
+    const selected = state.selectedIngredients.some(i => i.toLowerCase() === ingEn.toLowerCase());
     chip.classList.toggle('selected', selected);
   });
 }
@@ -1043,8 +1252,14 @@ async function loadInitialRecipes() {
   try {
     const data = await apiFetch('/search.php?s=');
     state.meals = data.meals || [];
+    if (state.meals.length === 0) throw new Error('No meals');
     filterAndRenderMeals();
-  } catch (e) { showError(); }
+  } catch (e) {
+    // Use fallback recipes when API fails
+    console.warn('API unavailable, using fallback recipes');
+    state.meals = [...FALLBACK_RECIPES];
+    filterAndRenderMeals();
+  }
 }
 
 async function loadByCategory(category) {
@@ -1052,8 +1267,13 @@ async function loadByCategory(category) {
   try {
     const data = await apiFetch(`/filter.php?c=${encodeURIComponent(category)}`);
     state.meals = data.meals || [];
+    if (state.meals.length === 0) throw new Error('No meals');
     filterAndRenderMeals();
-  } catch (e) { showError(); }
+  } catch (e) {
+    // Fallback: filter embedded recipes by category
+    state.meals = FALLBACK_RECIPES.filter(m => m.strCategory === category);
+    filterAndRenderMeals();
+  }
 }
 
 async function loadByArea(area) {
@@ -1061,8 +1281,13 @@ async function loadByArea(area) {
   try {
     const data = await apiFetch(`/filter.php?a=${encodeURIComponent(area)}`);
     state.meals = data.meals || [];
+    if (state.meals.length === 0) throw new Error('No meals');
     filterAndRenderMeals();
-  } catch (e) { showError(); }
+  } catch (e) {
+    // Fallback: filter embedded recipes by area
+    state.meals = FALLBACK_RECIPES.filter(m => m.strArea === area);
+    filterAndRenderMeals();
+  }
 }
 
 // ========== INGREDIENT SEARCH (CORE) ==========
@@ -1076,7 +1301,23 @@ async function searchByIngredients() {
     );
     const results = await Promise.all(promises);
 
-    if (results.length === 1) {
+    // Check if all API calls returned empty (API might be down)
+    const allEmpty = results.every(r => r.length === 0);
+
+    if (allEmpty) {
+      // Use fallback recipes - filter by ingredients
+      const selectedLower = ingredients.map(i => i.toLowerCase());
+      state.allIngredientMeals = FALLBACK_RECIPES.filter(meal => {
+        const mealIngredients = [];
+        for (let i = 1; i <= 20; i++) {
+          const ing = meal[`strIngredient${i}`];
+          if (ing && ing.trim()) mealIngredients.push(ing.trim().toLowerCase());
+        }
+        return selectedLower.every(sel =>
+          mealIngredients.some(mi => mi.includes(sel) || sel.includes(mi))
+        );
+      });
+    } else if (results.length === 1) {
       state.allIngredientMeals = results[0];
     } else {
       const idSets = results.map(meals => new Set(meals.map(m => m.idMeal)));
@@ -1088,7 +1329,21 @@ async function searchByIngredients() {
     state.meals = [...state.allIngredientMeals];
     filterAndRenderMeals();
     showIngredientSuggestions();
-  } catch (e) { showError(); }
+  } catch (e) {
+    // Final fallback
+    const selectedLower = state.selectedIngredients.map(i => i.toLowerCase());
+    state.meals = FALLBACK_RECIPES.filter(meal => {
+      const mealIngredients = [];
+      for (let i = 1; i <= 20; i++) {
+        const ing = meal[`strIngredient${i}`];
+        if (ing && ing.trim()) mealIngredients.push(ing.trim().toLowerCase());
+      }
+      return selectedLower.every(sel =>
+        mealIngredients.some(mi => mi.includes(sel) || sel.includes(mi))
+      );
+    });
+    filterAndRenderMeals();
+  }
 }
 
 // ========== SUGGESTIONS ==========
@@ -1148,6 +1403,12 @@ function showLoading(msg) {
 
 function showError() {
   state.isLoading = false;
+  // Try fallback recipes instead of just showing error
+  if (state.meals.length === 0 && FALLBACK_RECIPES.length > 0) {
+    state.meals = [...FALLBACK_RECIPES];
+    renderRecipes();
+    return;
+  }
   document.getElementById('recipesContainer').innerHTML =
     `<div class="error-state"><p>${t('error_desc')}</p><button class="retry-btn" onclick="loadInitialRecipes()">${t('retry')}</button></div>`;
 }
@@ -1193,9 +1454,17 @@ function renderRecipeCards(meals) {
 // ========== LOAD RECIPE ==========
 async function loadRecipeById(id) {
   try {
+    // Check if it's a fallback recipe first
+    const fallback = FALLBACK_RECIPES.find(m => m.idMeal === id);
+    if (fallback) { openRecipeModal(fallback); return; }
     const data = await apiFetch(`/lookup.php?i=${id}`);
     if (data.meals && data.meals[0]) openRecipeModal(data.meals[0]);
-  } catch (e) { showToast(t('error')); }
+  } catch (e) {
+    // Try fallback
+    const fallback = FALLBACK_RECIPES.find(m => m.idMeal === id);
+    if (fallback) openRecipeModal(fallback);
+    else showToast(t('error'));
+  }
 }
 
 async function loadRandomRecipe() {
@@ -1204,9 +1473,11 @@ async function loadRandomRecipe() {
   try {
     const data = await apiFetch('/random.php');
     if (data.meals && data.meals[0]) container.innerHTML = renderRecipeCards(data.meals);
-    else container.innerHTML = `<div class="empty-state"><div class="empty-icon">\u{1F3B2}</div><div class="empty-title">${t('no_results')}</div></div>`;
+    else throw new Error('No meals');
   } catch (e) {
-    container.innerHTML = `<div class="error-state"><p>${t('error')}</p><button class="retry-btn" onclick="loadRandomRecipe()">${t('retry')}</button></div>`;
+    // Fallback: pick a random recipe from embedded data
+    const random = FALLBACK_RECIPES[Math.floor(Math.random() * FALLBACK_RECIPES.length)];
+    container.innerHTML = renderRecipeCards([random]);
   }
 }
 
