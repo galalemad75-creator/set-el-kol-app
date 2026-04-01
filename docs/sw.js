@@ -3,7 +3,7 @@
    Caches app shell + recent recipes for offline support
    ========================================================== */
 
-const CACHE_NAME = 'setelkol-v2';
+const CACHE_NAME = 'setelkol-v3b';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
