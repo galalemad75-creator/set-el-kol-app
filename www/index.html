@@ -521,6 +521,8 @@
     .footer-links { margin-top: 12px; display: flex; justify-content: center; gap: 20px; }
     .footer-link {
       font-size: 0.82rem; color: var(--primary); text-decoration: none; font-weight: 600;
+      background: none; border: none; cursor: pointer; font-family: var(--font-main);
+      padding: 4px 0;
     }
 
     /* ========== TOAST ========== */
@@ -748,8 +750,8 @@
       <div class="search-row">
         <span class="search-icon">🥘</span>
         <input type="text" id="searchInput" placeholder="اكتب مكون بالعربي أو الإنجليزي واضغط ＋ (مثل: دجاج, chicken, طماطم)..."
-               onkeydown="if(event.key==='Enter') addIngredientFromInput()">
-        <button class="add-ingredient-btn" onclick="addIngredientFromInput()" title="إضافة مكون">＋</button>
+               onkeydown="if(event.key==='Enter'){event.preventDefault();addIngredientAndSearch()}">
+        <button class="add-ingredient-btn" onclick="addIngredientAndSearch()" title="إضافة مكون">＋</button>
       </div>
       <!-- Selected ingredient tags -->
       <div class="ingredient-tags" id="ingredientTags"></div>
@@ -822,9 +824,9 @@
   <div class="footer-logo">ست الكل — Set El Kol</div>
   <div class="footer-sub">تطبيق ذكي للوصفات | البيانات: TheMealDB API</div>
   <div class="footer-links">
-    <a href="#" class="footer-link" onclick="openInfoPage('about'); return false;">من نحن</a>
-    <a href="#" class="footer-link" onclick="openInfoPage('privacy'); return false;">سياسة الخصوصية</a>
-    <a href="#" class="footer-link" onclick="openInfoPage('terms'); return false;">شروط الاستخدام</a>
+    <button class="footer-link" type="button" onclick="openInfoPage('about')">من نحن</button>
+    <button class="footer-link" type="button" onclick="openInfoPage('privacy')">سياسة الخصوصية</button>
+    <button class="footer-link" type="button" onclick="openInfoPage('terms')">شروط الاستخدام</button>
   </div>
 </footer>
 
@@ -1501,6 +1503,22 @@ function addIngredientFromInput() {
     if (t) addIngredient(t);
   });
   input.value = '';
+}
+
+// Add ingredient from input AND immediately search
+function addIngredientAndSearch() {
+  const input = document.getElementById('searchInput');
+  const val = input.value.trim();
+  if (val) {
+    val.split(/[,،]+/).forEach(v => {
+      const t = v.trim();
+      if (t) addIngredient(t);
+    });
+    input.value = '';
+  }
+  if (state.selectedIngredients.length > 0) {
+    searchByIngredients();
+  }
 }
 
 function renderIngredientTags() {
