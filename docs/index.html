@@ -1721,8 +1721,30 @@ async function searchByIngredients() {
     }
 
     if (mealIds.length === 0) {
-      state.meals = [];
-      filterAndRenderMeals();
+      // FIX: If no overlap, show all results from first (broadest) ingredient
+      // and clear cuisine/category filters instead of showing nothing
+      const fallbackIds = results[0].map(m => m.idMeal);
+      const allDetails = [];
+      for (let i = 0; i < fallbackIds.length; i += 5) {
+        const batch = fallbackIds.slice(i, i + 5);
+        const results2 = await Promise.all(batch.map(id =>
+          apiFetch(`/lookup.php?i=${id}`).then(d => (d.meals && d.meals[0]) || null).catch(() => null)
+        ));
+        results2.forEach(m => { if (m) allDetails.push(m); });
+        if (i + 5 < fallbackIds.length) await new Promise(r => setTimeout(r, 500));
+      }
+      state.meals = allDetails;
+      // Reset filters that caused empty results
+      if (state.activeCuisine) {
+        state.activeCuisine = null;
+        renderCuisineFilters();
+      }
+      if (state.activeCategory !== 'all') {
+        state.activeCategory = 'all';
+        document.querySelectorAll('.cat-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.cat === 'all'));
+      }
+      showToast(state.language === 'ar' ? '⚠️ لا توجد وصفات تجمع بين كل الفلاتر — عرض كل النتائج' : '⚠️ No overlap found — showing all results');
+      renderRecipes();
       showIngredientSuggestions();
       return;
     }
