@@ -1098,6 +1098,20 @@ const state = {
 // ========== API ==========
 const API_BASE = 'https://www.themealdb.com/api/json/v1/1';
 
+// ========== API-FRIENDLY INGREDIENT NAME MAP ==========
+// TheMealDB's filter API doesn't recognize all ingredient names
+const API_INGREDIENT_ALTERNATIVES = {
+  'pasta': ['macaroni', 'spaghetti'],
+  'mince': ['minced beef'],
+  'cheese': ['cheddar cheese', 'parmesan'],
+  'egg': ['eggs'],
+  'cream': ['double cream', 'sour cream'],
+  'oil': ['olive oil', 'vegetable oil'],
+  'stock': ['chicken stock', 'vegetable stock'],
+  'pepper': ['red pepper', 'green pepper'],
+  'rice': ['long grain rice', 'white rice']
+};
+
 // ========== ARABIC → ENGLISH INGREDIENT MAP ==========
 const INGREDIENT_MAP_AR = {
   'دجاج': 'Chicken', 'فراخ': 'Chicken', 'جاج': 'Chicken', 'فرخة': 'Chicken', 'فراخة': 'Chicken',
@@ -1150,7 +1164,14 @@ const INGREDIENT_MAP_AR = {
   'برتقال': 'Orange', 'تفاح': 'Apple', 'موز': 'Banana',
   'فراولة': 'Strawberry', 'مانجو': 'Mango',
   'رقاق': 'Pastry', 'عجينة': 'Dough', 'فريكة': 'Freekeh',
-  'برغل': 'Bulgur'
+  'برغل': 'Bulgur',
+  // Compound ingredients — expand to components
+  'بشاميل': 'Butter,Flour,Milk', 'بشمل': 'Butter,Flour,Milk', 'صوص ابيض': 'Butter,Flour,Milk',
+  'صوص بشاميل': 'Butter,Flour,Milk', 'البشامل': 'Butter,Flour,Milk',
+  'صوص طماطم': 'Tomato,Garlic,Onion', 'مارينارا': 'Tomato,Garlic',
+  'توابل مصريه': 'Cumin,Coriander', 'بهارات مصرية': 'Cumin,Coriander',
+  'مرق دجاج': 'Chicken,Stock', 'مرقة دجاج': 'Chicken,Stock',
+  'صلصة': 'Tomato', 'معجون': 'Tomato Puree'
 };
 
 // Translate Arabic ingredient to English
@@ -2402,11 +2423,20 @@ function addIngredient(name) {
   if (!trimmed) return;
   // Translate Arabic to English for API
   const translated = translateIngredient(trimmed);
-  if (state.selectedIngredients.some(i => i.toLowerCase() === translated.toLowerCase())) return;
-  state.selectedIngredients.push(translated);
+  // Handle compound translations (e.g. بشاميل → "Butter,Flour,Milk")
+  const parts = translated.split(',').map(p => p.trim()).filter(Boolean);
+  let added = [];
+  parts.forEach(part => {
+    if (!state.selectedIngredients.some(i => i.toLowerCase() === part.toLowerCase())) {
+      state.selectedIngredients.push(part);
+      added.push(part);
+    }
+  });
+  if (added.length === 0) return;
   renderIngredientTags();
   updateQuickChipStates();
-  showToast(t('added_ingredient') + ' ' + (translated !== trimmed ? `${trimmed} → ${translated}` : translated));
+  const label = added.length > 1 ? `${trimmed} → ${added.join(' + ')}` : (added[0] !== trimmed ? `${trimmed} → ${added[0]}` : added[0]);
+  showToast(t('added_ingredient') + ' ' + label);
 }
 
 function removeIngredient(name) {
@@ -2566,9 +2596,15 @@ async function loadByArea(area) {
         const ing = meal[`strIngredient${i}`];
         if (ing && ing.trim()) mealIngredients.push(ing.trim().toLowerCase());
       }
-      return selectedLower.every(sel =>
-        mealIngredients.some(mi => mi.includes(sel) || sel.includes(mi))
-      );
+      return selectedLower.every(sel => {
+        const selNorm = sel.replace(/[^a-z0-9]/g, '');
+        if (!selNorm) return true;
+        return mealIngredients.some(mi => {
+          const miNorm = mi.replace(/[^a-z0-9]/g, '');
+          if (!miNorm) return false;
+          return miNorm === selNorm || miNorm.includes(selNorm) || selNorm.includes(miNorm);
+        });
+      });
     });
   }
   state.meals = meals;
@@ -2647,15 +2683,18 @@ async function searchByIngredients() {
       const ing = meal[`strIngredient${i}`];
       if (ing && ing.trim()) mealIngredients.push(ing.trim().toLowerCase());
     }
-    // Match ONLY if ALL selected ingredients are found (AND logic, not OR)
-    const ingredientMatch = selectedLower.every(sel =>
-      mealIngredients.some(mi => {
+    // Match ONLY if ALL selected ingredients are found (AND logic)
+    const ingredientMatch = selectedLower.every(sel => {
+      // Skip empty/untranslatable inputs (safety guard)
+      const selNorm = sel.replace(/[^a-z0-9]/g, '');
+      if (!selNorm) return true; // skip untranslated (already handled by compound expansion)
+      return mealIngredients.some(mi => {
         const miNorm = mi.replace(/[^a-z0-9]/g, '');
-        const selNorm = sel.replace(/[^a-z0-9]/g, '');
-        return miNorm.includes(selNorm) || selNorm.includes(miNorm)
-          || mi.includes(sel) || sel.includes(mi);
-      })
-    );
+        if (!miNorm) return false;
+        // Exact or substring match on normalized strings
+        return miNorm === selNorm || miNorm.includes(selNorm) || selNorm.includes(miNorm);
+      });
+    });
     if (!ingredientMatch) return false;
     // Also filter by selected cuisine/area if active
     if (state.activeCuisine && meal.strArea !== state.activeCuisine) return false;
@@ -2669,9 +2708,20 @@ async function searchByIngredients() {
 
   // Background: try API and merge (non-blocking)
   try {
-    const promises = ingredients.map(ing =>
-      apiFetch(`/filter.php?i=${encodeURIComponent(ing)}`).then(d => d.meals || []).catch(() => [])
-    );
+    const promises = ingredients.map(async ing => {
+      // Try primary ingredient name
+      let data = await apiFetch(`/filter.php?i=${encodeURIComponent(ing)}`).catch(() => null);
+      let meals = (data && data.meals) || [];
+      // If null, try alternative names (e.g. "pasta" → "macaroni")
+      if (meals.length === 0 && API_INGREDIENT_ALTERNATIVES[ing.toLowerCase()]) {
+        const alts = API_INGREDIENT_ALTERNATIVES[ing.toLowerCase()];
+        for (const alt of alts) {
+          data = await apiFetch(`/filter.php?i=${encodeURIComponent(alt)}`).catch(() => null);
+          if (data && data.meals) { meals = data.meals; break; }
+        }
+      }
+      return meals;
+    });
     const results = await Promise.all(promises);
     const apiEmpty = results.every(r => r.length === 0);
     if (!apiEmpty) {
