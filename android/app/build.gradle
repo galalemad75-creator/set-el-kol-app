@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId "com.setelkol.recipes"
         minSdkVersion rootProject.ext.minSdkVersion   // 24 (Android 7.0)
-        targetSdkVersion rootProject.ext.targetSdkVersion  // 34 (Android 14)
+        targetSdkVersion rootProject.ext.targetSdkVersion  // 35 (Android 15)
         versionCode 1
         versionName "1.0.0"
 

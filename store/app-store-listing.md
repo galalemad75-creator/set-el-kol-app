@@ -45,10 +45,10 @@ Secondary: Lifestyle
 4+ (No objectionable content)
 
 ## Privacy Policy URL
-https://your-domain.com/set-el-kol/privacy-policy.html
+https://galalemad75-creator.github.io/set-el-kol-app/privacy-policy.html
 
 ## Support URL
-https://your-domain.com/set-el-kol/
+https://galalemad75-creator.github.io/set-el-kol-app/
 
 ## Copyright
 © 2026 Set El Kol

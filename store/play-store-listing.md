@@ -78,7 +78,7 @@ Everyone
 - No user data is collected or stored on external servers
 
 ## Privacy Policy URL
-https://your-domain.com/set-el-kol/privacy-policy.html
+https://galalemad75-creator.github.io/set-el-kol-app/privacy-policy.html
 
 ## Screenshots Required
 - Phone screenshots: 2-8 screenshots (16:9 ratio, 1080x1920 recommended)

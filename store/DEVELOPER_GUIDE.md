@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Node.js 18+ and npm
-- For Android: Android Studio, Java 17+, Android SDK 34
+- For Android: Android Studio, Java 17+, Android SDK 35
 - For iOS: macOS, Xcode 15+, CocoaPods
 
 ## Quick Start
@@ -151,7 +151,7 @@ npx cap open ios
 ## App Store Requirements Checklist
 
 ### Google Play Store
-- [x] Target SDK 34 (Android 14)
+- [x] Target SDK 35 (Android 15) — required by Google Play Aug 2025+
 - [x] 64-bit support
 - [x] App icon 512x512
 - [x] Privacy policy
